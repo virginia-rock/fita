@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -13,6 +13,9 @@ import {
   weekdayName,
   type Recurrence,
 } from "@/lib/storage";
+import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/lib/supabase-auth";
 
 export const Route = createFileRoute("/cronologia")({
   head: () => ({
@@ -43,10 +46,33 @@ const TIPOS: { id: Recurrence["type"]; label: string }[] = [
 
 function Cronologia() {
   const { data, setRecurrence, removeEntry } = useAppData();
+  const { user, loading: authLoading } = useSupabaseAuth();
+  const demoAccount = loadDemoSession();
+  const cloudSyncEnabled = Boolean(
+    (user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount)) ||
+      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
+  );
   const [ref, setRef] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+
+  if (!authLoading && !cloudSyncEnabled) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-xl rounded-sm bg-vellum/50 p-8 ring-1 ring-ink/10">
+          <div className="label-caps text-clay">Recurso Pro</div>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight">A cronologia está disponível nos planos Pro.</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink/60">
+            Faça um pagamento único ou assine para acessar a agenda de medições e sincronizar seu histórico na nuvem.
+          </p>
+          <Link to="/" hash="planos" className="mt-6 inline-block rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
+            Conhecer os planos
+          </Link>
+        </div>
+      </AppShell>
+    );
+  }
 
   const r = data.recurrence;
   const proxima = nextScheduled(r);

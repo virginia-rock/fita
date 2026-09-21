@@ -25,6 +25,9 @@ import {
   useAppData,
   type Entry,
 } from "@/lib/storage";
+import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/lib/supabase-auth";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -78,6 +81,12 @@ const GROUP_TAPE: Record<(typeof METRIC_GROUPS)[number], string> = {
 
 function Painel() {
   const { data, hydrated } = useAppData();
+  const { user } = useSupabaseAuth();
+  const demoAccount = loadDemoSession();
+  const cloudSyncEnabled = Boolean(
+    (user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount)) ||
+      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
+  );
   const entries = data.entries;
   const last = entries[entries.length - 1];
   const prev = entries[entries.length - 2];
@@ -256,12 +265,12 @@ function Painel() {
                 {daysUntil(proxima) === 0 ? "É hoje" : `Em ${daysUntil(proxima)} dias`}
               </div>
             )}
-            <Link
+            {cloudSyncEnabled && <Link
               to="/cronologia"
               className="mt-4 block text-[10px] font-bold uppercase tracking-widest text-clay"
             >
               Configurar recorrência
-            </Link>
+            </Link>}
           </div>
         </div>
       </div>
