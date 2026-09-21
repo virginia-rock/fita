@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { exportData, parseImported, useAppData } from "@/lib/storage";
 import { createPixPayload, PIX_KEY } from "@/lib/pix";
-import { loadDemoSession } from "@/lib/demo-account";
+import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
@@ -46,6 +46,11 @@ export function AppShell({
   const [copied, setCopied] = useState(false);
   const [hasDemoSession, setHasDemoSession] = useState(false);
   const { user: supabaseUser, loading: authLoading } = useSupabaseAuth();
+  const demoAccount = loadDemoSession();
+  const cloudSyncEnabled = Boolean(
+    (supabaseUser && demoAccount?.id === supabaseUser.id && hasDemoCloudAccess(demoAccount)) ||
+      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
+  );
   const visibleNav = NAV;
 
   useEffect(() => {
@@ -300,7 +305,7 @@ export function AppShell({
       </Dialog>
 
       <div className="mx-auto mt-8 max-w-[1200px] space-y-6 px-6">
-        {showLocalStorageNotice && <LocalStorageNotice />}
+        {showLocalStorageNotice && !cloudSyncEnabled && <LocalStorageNotice />}
         <nav className="flex gap-6 border-b border-ink/5 pb-2 text-[11px] font-semibold uppercase tracking-widest">
           {visibleNav.map((item) => (
             <Link
