@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AccountModal } from "@/components/AccountModal";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { PlanCard } from "@/components/PlanCard";
-import type { DemoPlan } from "@/lib/demo-account";
+import { hasDemoCloudAccess, loadDemoSession, type DemoPlan } from "@/lib/demo-account";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
@@ -28,10 +28,22 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const [accountModalPlan, setAccountModalPlan] = useState<DemoPlan | null>(null);
   const { user, loading: authLoading } = useSupabaseAuth();
+  const demoAccount = loadDemoSession();
+  const hasProAccess = Boolean(
+    user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
+  );
+
+  const handleAppEntry = () => {
+    if (!authLoading && user) {
+      window.location.assign("/conta");
+      return;
+    }
+    setAccountModalPlan("local");
+  };
 
   const handlePlan = (plan: Exclude<DemoPlan, "local">) => {
     if (!authLoading && user) {
-      window.location.assign(`/checkout?plan=${plan}`);
+      window.location.assign(hasProAccess ? "/conta" : `/checkout?plan=${plan}`);
       return;
     }
     setAccountModalPlan(plan);
@@ -55,10 +67,10 @@ function Landing() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setAccountModalPlan("local")}
+            onClick={handleAppEntry}
             className="rounded-sm px-3 py-2 text-xs font-medium text-ink/65 transition-colors hover:text-ink"
           >
-            Entrar no app
+            {user ? "Minha conta" : "Entrar no app"}
           </button>
           <a
             href="https://github.com/carlospessin/fita"
@@ -96,7 +108,7 @@ function Landing() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => setAccountModalPlan("local")}
+              onClick={handleAppEntry}
               className="rounded-sm bg-clay px-5 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2"
             >
               Criar conta grátis
@@ -113,7 +125,7 @@ function Landing() {
         <div className="mt-16 max-w-2xl">
           <LocalStorageNotice>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <button type="button" onClick={() => setAccountModalPlan("local")} className="font-medium text-clay underline-offset-4 hover:underline">
+              <button type="button" onClick={handleAppEntry} className="font-medium text-clay underline-offset-4 hover:underline">
                 Criar conta grátis
               </button>
               <span className="text-ink/45">Importe e exporte seus dados quando quiser.</span>
