@@ -1,3 +1,5 @@
+![Logo Fita](https://fita-site.vercel.app/logo.png)
+
 # Fita.
 
 ## Acompanhe sua evolução corporal com clareza
