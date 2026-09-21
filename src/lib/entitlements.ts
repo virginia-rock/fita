@@ -36,3 +36,43 @@ export function isCloudEntitled(entitlement: Entitlement | null, now = new Date(
   const expiresAt = new Date(entitlement.expires_at);
   return !Number.isNaN(expiresAt.getTime()) && expiresAt > now;
 }
+
+export function canUseCloudSync(
+  entitlement: Entitlement | null,
+  loading: boolean,
+  error: unknown,
+  now = new Date(),
+) {
+  return !loading && !error && isCloudEntitled(entitlement, now);
+}
+
+export function shouldMigrateLegacyEntitlement(
+  legacy: {
+    id: string;
+    plan: string;
+    status: string;
+    expiresAt?: string;
+  } | null,
+  userId: string,
+  remote: Entitlement | null,
+  now = new Date(),
+) {
+  if (
+    !legacy ||
+    remote ||
+    legacy.id !== userId ||
+    !plans.includes(legacy.plan as EntitlementPlan) ||
+    !statuses.includes(legacy.status as EntitlementStatus)
+  ) return false;
+  if (legacy.plan === "local") return false;
+  return isCloudEntitled(
+    {
+      user_id: legacy.id,
+      plan: legacy.plan as EntitlementPlan,
+      status: legacy.status as EntitlementStatus,
+      expires_at: legacy.expiresAt ?? null,
+      source: "demo",
+    },
+    now,
+  );
+}
