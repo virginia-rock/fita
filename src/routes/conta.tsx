@@ -11,6 +11,7 @@ import {
   saveDemoAccount,
   type DemoAccount,
 } from "@/lib/demo-account";
+import { cancelDemoEntitlement } from "@/lib/supabase-entitlements";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth, signOutFromSupabase } from "@/lib/supabase-auth";
 
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/conta")({
 
 function Conta() {
   const [demoAccount, setDemoAccount] = useState<DemoAccount | null>(null);
+  const [subscriptionError, setSubscriptionError] = useState("");
   const { user, loading: authLoading } = useSupabaseAuth();
   const { entitlement, entitlementLoading, entitlementError } = useAppData();
 
@@ -107,12 +109,23 @@ function Conta() {
               account={account}
               isSupabaseAccount={Boolean(user)}
               cloudSyncEnabled={cloudSyncEnabled}
-              onCancelSubscription={() => {
-                const canceled = cancelDemoSubscription(account);
-                saveDemoAccount(canceled);
-                setDemoAccount(canceled);
+              onCancelSubscription={async () => {
+                setSubscriptionError("");
+                try {
+                  await cancelDemoEntitlement();
+                  const canceled = cancelDemoSubscription(account);
+                  saveDemoAccount(canceled);
+                  setDemoAccount(canceled);
+                } catch {
+                  setSubscriptionError("Não foi possível cancelar o plano Pro no Supabase.");
+                }
               }}
             />
+          )}
+          {subscriptionError && (
+            <div className="rounded-sm bg-clay/10 p-4 text-sm text-clay" role="alert">
+              {subscriptionError}
+            </div>
           )}
           <div className="border-t border-ink/10 pt-5">
             <button

@@ -40,3 +40,14 @@ export async function activateDemoEntitlement(
   if (!entitlement) throw new Error("O Supabase retornou um entitlement inválido.");
   return entitlement;
 }
+
+export async function cancelDemoEntitlement(): Promise<Entitlement> {
+  if (!supabase) throw new Error("Supabase não está configurado.");
+
+  const { data, error } = await supabase.rpc("cancel_demo_entitlement");
+  if (error) throw error;
+
+  const entitlement = parseEntitlement(data);
+  if (!entitlement) throw new Error("O Supabase retornou um entitlement inválido.");
+  return entitlement;
+}

@@ -4,7 +4,7 @@ type MembershipStatusProps = {
   account: DemoAccount | null;
   isSupabaseAccount?: boolean;
   cloudSyncEnabled?: boolean;
-  onCancelSubscription?: () => void;
+  onCancelSubscription?: () => void | Promise<void>;
 };
 
 export function MembershipStatus({

@@ -76,3 +76,33 @@ $$;
 
 revoke all on function public.activate_demo_entitlement(text) from public;
 grant execute on function public.activate_demo_entitlement(text) to authenticated;
+
+create or replace function public.cancel_demo_entitlement()
+returns public.fita_entitlements
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result public.fita_entitlements;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  update public.fita_entitlements
+  set status = 'canceled'
+  where user_id = auth.uid()
+    and source = 'demo'
+  returning * into result;
+
+  if result.user_id is null then
+    raise exception 'No demo entitlement found';
+  end if;
+
+  return result;
+end;
+$$;
+
+revoke all on function public.cancel_demo_entitlement() from public;
+grant execute on function public.cancel_demo_entitlement() to authenticated;

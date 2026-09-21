@@ -19,4 +19,6 @@ test("entitlement migration defines a protected user-owned plan table", async ()
   assert.match(sql, /auth\.uid\(\)\)\s*=\s*user_id/i);
   assert.match(sql, /create or replace function public\.activate_demo_entitlement/i);
   assert.match(sql, /grant execute on function public\.activate_demo_entitlement\(text\) to authenticated/i);
+  assert.match(sql, /create or replace function public\.cancel_demo_entitlement/i);
+  assert.match(sql, /grant execute on function public\.cancel_demo_entitlement\(\) to authenticated/i);
 });
