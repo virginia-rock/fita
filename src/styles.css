@@ -1,0 +1,173 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@theme inline {
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-vellum: var(--vellum);
+  --color-clay: var(--clay);
+  --color-sage: var(--sage);
+  --color-ochre: var(--ochre);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-tape-rose: var(--tape-rose);
+  --color-tape-amber: var(--tape-amber);
+  --color-tape-mint: var(--tape-mint);
+  --color-tape-sky: var(--tape-sky);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 2px;
+  --ink: oklch(0.31 0.017 55);
+  --paper: oklch(0.982 0.009 90);
+  --vellum: oklch(0.957 0.014 88);
+  --clay: oklch(0.55 0.093 40);
+  --sage: oklch(0.51 0.025 115);
+  --ochre: oklch(0.75 0.073 66);
+  --up: oklch(0.55 0.13 150);
+  --down: oklch(0.55 0.17 27);
+  --tape-rose: oklch(0.978 0.018 20);
+  --tape-rose-line: oklch(0.91 0.034 20);
+  --tape-rose-mark: oklch(0.65 0.055 20);
+  --tape-amber: oklch(0.982 0.024 94);
+  --tape-amber-line: oklch(0.92 0.04 94);
+  --tape-amber-mark: oklch(0.62 0.06 94);
+  --tape-mint: oklch(0.975 0.022 158);
+  --tape-mint-line: oklch(0.91 0.037 158);
+  --tape-mint-mark: oklch(0.58 0.055 158);
+  --tape-sky: oklch(0.975 0.022 240);
+  --tape-sky-line: oklch(0.91 0.038 240);
+  --tape-sky-mark: oklch(0.59 0.06 240);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(1 0 0);
+  --primary: var(--clay);
+  --primary-foreground: var(--paper);
+  --secondary: var(--vellum);
+  --muted: var(--vellum);
+  --muted-foreground: oklch(0.52 0.014 60);
+  --accent: var(--vellum);
+  --destructive: var(--down);
+  --border: oklch(0.31 0.017 55 / 12%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+}
+
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility label-caps {
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+@utility paper-grain {
+  background-image: radial-gradient(oklch(0.31 0.017 55 / 12%) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+@utility measurement-card {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--paper);
+  border-color: var(--color-border);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--ink) 5%, transparent);
+
+  &:hover {
+    box-shadow: 0 12px 28px -18px color-mix(in oklab, var(--tape-mark) 45%, transparent);
+    transform: translateY(-2px);
+  }
+}
+
+@utility tape-rose {
+  --tape-bg: var(--tape-rose);
+  --tape-line: var(--tape-rose-line);
+  --tape-mark: var(--tape-rose-mark);
+}
+
+@utility tape-amber {
+  --tape-bg: var(--tape-amber);
+  --tape-line: var(--tape-amber-line);
+  --tape-mark: var(--tape-amber-mark);
+}
+
+@utility tape-mint {
+  --tape-bg: var(--tape-mint);
+  --tape-line: var(--tape-mint-line);
+  --tape-mark: var(--tape-mint-mark);
+}
+
+@utility tape-sky {
+  --tape-bg: var(--tape-sky);
+  --tape-line: var(--tape-sky-line);
+  --tape-mark: var(--tape-sky-mark);
+}
+
+@utility tape-scale {
+  color: var(--tape-mark);
+  border-color: var(--tape-line);
+  background-color: var(--tape-bg);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 11px,
+    color-mix(in oklab, var(--tape-mark) 45%, transparent) 11px,
+    color-mix(in oklab, var(--tape-mark) 45%, transparent) 12px,
+    transparent 12px,
+    transparent 23px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .measurement-card {
+    transition: none;
+  }
+
+  .measurement-card:hover {
+    transform: none;
+  }
+}
