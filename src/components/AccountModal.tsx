@@ -77,7 +77,7 @@ export function AccountModal({ open, onOpenChange, plan }: AccountModalProps) {
               : mode === "login"
                 ? "Entre na sua conta para continuar."
                 : isLocal
-                  ? "Crie uma conta para acessar o teste e manter seu acesso identificado."
+                  ? "Crie uma conta para usar o plano gratuito e manter seus dados neste navegador."
                   : "Crie uma conta para continuar para o checkout de demonstração."}
           </DialogDescription>
         </DialogHeader>
@@ -102,7 +102,7 @@ export function AccountModal({ open, onOpenChange, plan }: AccountModalProps) {
               {requiresEmailConfirmation
                 ? "Ir para o login"
                 : isLocal
-                  ? "Abrir o teste"
+                  ? "Continuar para o app"
                   : "Continuar para o checkout"}
             </button>
           </div>
@@ -130,7 +130,7 @@ export function AccountModal({ open, onOpenChange, plan }: AccountModalProps) {
                   const account = loadDemoSession();
                   if (!account || account.email !== email || account.demoPassword !== password) {
                     setLoginError(
-                      "Não encontrei uma conta demo com esses dados. Crie uma conta primeiro.",
+                      "Não encontrei uma conta com esses dados. Crie uma conta primeiro.",
                     );
                     setSubmitting(false);
                     return;

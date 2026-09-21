@@ -89,7 +89,7 @@ function Landing() {
               onClick={() => setAccountModalPlan("local")}
               className="rounded-sm bg-clay px-5 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2"
             >
-              Testar sem cadastro
+              Criar conta grátis
             </button>
             <a
               href="#planos"
@@ -104,7 +104,7 @@ function Landing() {
           <LocalStorageNotice>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
               <button type="button" onClick={() => setAccountModalPlan("local")} className="font-medium text-clay underline-offset-4 hover:underline">
-                Abrir o teste local
+                Criar conta grátis
               </button>
               <span className="text-ink/45">Importe e exporte seus dados quando quiser.</span>
             </div>
@@ -117,8 +117,7 @@ function Landing() {
           <div className="label-caps text-clay">Se quiser ir além</div>
           <h2 className="mt-3 text-3xl font-medium tracking-tight">Escolha como apoiar o Fita.</h2>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            Os fluxos de pagamento e armazenamento em nuvem ainda estão em demonstração. Você pode
-            testar tudo sem compromisso.
+            Crie sua conta para começar no plano gratuito ou escolha uma opção Pro com armazenamento em nuvem.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2">

@@ -29,7 +29,7 @@ function CriarConta() {
         <div className="mx-auto max-w-md">
           <Link to="/" className="label-caps text-clay hover:underline">← voltar para o Fita.</Link>
           <div className="mt-12 rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
-            <div className="label-caps text-sage">Confirmação simulada</div>
+            <div className="label-caps text-sage">Confirmação de e-mail</div>
             <h1 className="mt-3 text-3xl font-medium tracking-tight">Conta criada.</h1>
             <p className="mt-4 text-sm leading-relaxed text-ink/60">
               {requiresEmailConfirmation
@@ -37,7 +37,7 @@ function CriarConta() {
                     <>Enviamos um link de confirmação para <strong className="text-ink">{createdEmail}</strong>. Confirme seu e-mail e depois entre na conta para continuar.</>
                   )
                 : (
-                    <>Simulamos o envio de uma confirmação para <strong className="text-ink">{createdEmail}</strong>. Neste protótipo, você pode continuar direto para o checkout de demonstração.</>
+                    <>Sua conta foi criada para <strong className="text-ink">{createdEmail}</strong>. Você pode continuar para o checkout.</>
                   )}
             </p>
             <button
@@ -45,7 +45,7 @@ function CriarConta() {
               onClick={() => window.location.assign(requiresEmailConfirmation ? "/entrar" : `/checkout?plan=${plan}`)}
               className="mt-8 w-full rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2"
             >
-              {requiresEmailConfirmation ? "Ir para o login" : "Continuar para o checkout demo"}
+              {requiresEmailConfirmation ? "Ir para o login" : "Continuar para o checkout"}
             </button>
           </div>
         </div>
@@ -59,9 +59,9 @@ function CriarConta() {
         <Link to="/" className="label-caps text-clay hover:underline">← voltar para o Fita.</Link>
         <div className="mt-12 rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
           <div className="label-caps text-clay">Comece pelo seu e-mail</div>
-          <h1 className="mt-3 text-3xl font-medium tracking-tight">Criar conta demo</h1>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight">Criar sua conta</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            A conta é necessária apenas para simular o acesso aos planos pagos.
+            A conta é necessária para acessar o Fita. Comece no plano gratuito ou continue para um plano Pro.
           </p>
           <div className="mt-8">
             <AuthForm

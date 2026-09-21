@@ -87,6 +87,28 @@ export function AppShell({
     window.setTimeout(() => setCopied(false), 1800);
   };
 
+  if (!authLoading && !hasDemoSession) {
+    return (
+      <main className="min-h-screen px-6 py-12 text-ink">
+        <div className="mx-auto max-w-md rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
+          <div className="label-caps text-clay">Conta necessária</div>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight">Crie uma conta para continuar.</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink/60">
+            O Fita exige uma conta para acessar o painel e manter seu acesso identificado.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/criar-conta" className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
+              Criar conta
+            </Link>
+            <Link to="/entrar" className="rounded-sm bg-vellum px-4 py-3 text-xs font-medium uppercase tracking-widest text-ink/70 ring-1 ring-ink/10">
+              Entrar
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const hoje = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "2-digit",

@@ -104,7 +104,7 @@ export function AuthForm({ mode, onSubmit, submitting = false, error, confirmati
         disabled={submitting}
         className="w-full rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 disabled:opacity-60"
       >
-        {submitting ? "Aguarde…" : isSignup ? "Criar conta demo" : "Entrar na conta demo"}
+        {submitting ? "Aguarde…" : isSignup ? "Criar conta" : "Entrar na conta"}
       </button>
     </form>
   );

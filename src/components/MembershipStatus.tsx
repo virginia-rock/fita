@@ -20,8 +20,8 @@ export function MembershipStatus({
         <h2 className="mt-2 text-xl font-medium">{isSupabaseAccount ? "Plano gratuito" : "Teste local"}</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink/60">
           {isSupabaseAccount
-            ? "Seu login está conectado ao Supabase, mas o plano gratuito não sincroniza dados na nuvem. Fichas e histórico ficam salvos somente neste navegador."
-            : "Você está usando o Fita sem cadastro e sem armazenamento em nuvem."}
+            ? "O plano gratuito não sincroniza dados na nuvem. Fichas e histórico ficam salvos somente neste navegador."
+            : "Você está usando o plano gratuito. Suas fichas e seu histórico ficam salvos somente neste navegador."}
         </p>
       </div>
     );

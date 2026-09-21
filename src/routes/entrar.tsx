@@ -20,10 +20,10 @@ function Entrar() {
           ← voltar para o Fita.
         </Link>
         <div className="mt-12 rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
-          <div className="label-caps text-clay">Conta demo</div>
+          <div className="label-caps text-clay">Acesso à sua conta</div>
           <h1 className="mt-3 text-3xl font-medium tracking-tight">Entre no Fita.</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            Este login é apenas uma demonstração local. Nenhuma senha é enviada para um servidor.
+            Entre na sua conta para acessar suas fichas, histórico e configurações.
           </p>
           <div className="mt-8">
             <AuthForm
@@ -41,7 +41,7 @@ function Entrar() {
                 }
                 const account = loadDemoSession();
                 if (!account || account.email !== email || account.demoPassword !== password) {
-                  setError("Não encontrei uma conta demo com esses dados. Crie uma conta primeiro.");
+                  setError("Não encontrei uma conta com esses dados. Crie uma conta primeiro.");
                   return;
                 }
                 setDemoSession({ ...account, emailConfirmed: true });
@@ -50,7 +50,7 @@ function Entrar() {
             />
           </div>
           <p className="mt-6 text-center text-sm text-ink/55">
-            Ainda não tem uma conta? <Link to="/criar-conta" className="text-clay hover:underline">Crie uma conta demo</Link>.
+            Ainda não tem uma conta? <Link to="/criar-conta" className="text-clay hover:underline">Crie sua conta</Link>.
           </p>
         </div>
       </div>

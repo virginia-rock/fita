@@ -31,7 +31,7 @@ export function SimulatedCheckout({ plan, account, onComplete }: SimulatedChecko
         <p className="mt-3 text-sm leading-relaxed text-ink/60">{details.description}</p>
       </div>
       <div className="text-sm text-ink/60">
-        Conta demo: <strong className="text-ink">{account.email}</strong>
+        Conta: <strong className="text-ink">{account.email}</strong>
       </div>
       <div className="rounded-sm border-l-2 border-sage bg-sage/10 px-4 py-3 text-sm text-ink/70">
         Nenhum pagamento real será processado. Este botão apenas demonstra o próximo estado do
