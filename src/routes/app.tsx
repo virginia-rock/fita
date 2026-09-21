@@ -91,7 +91,18 @@ function Painel() {
     .filter((e) => e.values[abdomen.id] !== undefined)
     .map((e) => ({ date: formatDateBR(e.date).replace(/\sde\s/g, " "), valor: e.values[abdomen.id] }));
 
-  if (hydrated && entries.length === 0) {
+  if (!hydrated) {
+    return (
+      <AppShell>
+        <div className="rounded-sm bg-vellum/50 p-12 text-center ring-1 ring-ink/5">
+          <div className="label-caps text-ink/50">Carregando seus dados</div>
+          <p className="mt-3 text-sm text-ink/60">Só um instante.</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (entries.length === 0) {
     return (
       <AppShell>
         <div className="rounded-sm bg-vellum/50 p-12 text-center ring-1 ring-ink/5">
