@@ -5,6 +5,7 @@ import { AccountModal } from "@/components/AccountModal";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { PlanCard } from "@/components/PlanCard";
 import type { DemoPlan } from "@/lib/demo-account";
+import { useSupabaseAuth } from "@/lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +27,15 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [accountModalPlan, setAccountModalPlan] = useState<DemoPlan | null>(null);
+  const { user, loading: authLoading } = useSupabaseAuth();
+
+  const handlePlan = (plan: Exclude<DemoPlan, "local">) => {
+    if (!authLoading && user) {
+      window.location.assign(`/checkout?plan=${plan}`);
+      return;
+    }
+    setAccountModalPlan(plan);
+  };
 
   return (
     <main className="min-h-screen pb-20 text-ink">
@@ -128,7 +138,7 @@ function Landing() {
             description="Um mês de armazenamento em nuvem para manter seus registros disponíveis além deste navegador."
             features={["Um mês de acesso à nuvem", "Login e área da conta", "Cronologia"]}
             actionLabel="Adquirir um mês"
-            onAction={() => setAccountModalPlan("cloud_month")}
+            onAction={() => handlePlan("cloud_month")}
           />
           <PlanCard
             name="Apoio recorrente"
@@ -138,7 +148,7 @@ function Landing() {
             features={["Armazenamento em nuvem", "Login e área da conta", "Cronologia", "Cancele quando quiser"]}
             actionLabel="Assinar"
             featured
-            onAction={() => setAccountModalPlan("subscription")}
+            onAction={() => handlePlan("subscription")}
           />
         </div>
       </section>
