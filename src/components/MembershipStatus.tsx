@@ -3,10 +3,16 @@ import type { DemoAccount } from "@/lib/demo-account";
 type MembershipStatusProps = {
   account: DemoAccount | null;
   isSupabaseAccount?: boolean;
+  cloudSyncEnabled?: boolean;
   onCancelSubscription?: () => void;
 };
 
-export function MembershipStatus({ account, isSupabaseAccount = false, onCancelSubscription }: MembershipStatusProps) {
+export function MembershipStatus({
+  account,
+  isSupabaseAccount = false,
+  cloudSyncEnabled = false,
+  onCancelSubscription,
+}: MembershipStatusProps) {
   if (!account || account.plan === "local") {
     return (
       <div className="rounded-sm bg-vellum/50 p-5 ring-1 ring-ink/10">
@@ -14,7 +20,7 @@ export function MembershipStatus({ account, isSupabaseAccount = false, onCancelS
         <h2 className="mt-2 text-xl font-medium">{isSupabaseAccount ? "Plano gratuito" : "Teste local"}</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink/60">
           {isSupabaseAccount
-            ? "Sua conta está conectada ao Supabase. As fichas e o histórico são sincronizados na nuvem."
+            ? "Seu login está conectado ao Supabase, mas o plano gratuito não sincroniza dados na nuvem. Fichas e histórico ficam salvos somente neste navegador."
             : "Você está usando o Fita sem cadastro e sem armazenamento em nuvem."}
         </p>
       </div>
@@ -27,11 +33,14 @@ export function MembershipStatus({ account, isSupabaseAccount = false, onCancelS
       : "data não definida";
     return (
       <div className="rounded-sm bg-clay/5 p-5 ring-1 ring-clay/20">
-        <div className="label-caps text-clay">Pagamento único · demonstração</div>
+        <div className="label-caps text-clay">Pagamento único · Pro</div>
         <h2 className="mt-2 text-xl font-medium">Armazenamento em nuvem</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink/60">
-          Acesso simulado até <strong className="text-ink">{expiry}</strong>. A nuvem ainda não está
-          conectada nesta versão.
+          {cloudSyncEnabled ? (
+            <>Suas fichas e seu histórico são sincronizados na nuvem até <strong className="text-ink">{expiry}</strong>.</>
+          ) : (
+            <>Acesso simulado até <strong className="text-ink">{expiry}</strong>. A sincronização real ainda não está ativa.</>
+          )}
         </p>
       </div>
     );
@@ -39,12 +48,14 @@ export function MembershipStatus({ account, isSupabaseAccount = false, onCancelS
 
   return (
     <div className="rounded-sm bg-clay/5 p-5 ring-1 ring-clay/20">
-      <div className="label-caps text-clay">Assinatura · demonstração</div>
+      <div className="label-caps text-clay">Assinatura · Pro</div>
       <h2 className="mt-2 text-xl font-medium">Plano recorrente</h2>
       <p className="mt-2 text-sm leading-relaxed text-ink/60">
         {account.status === "canceled"
           ? "Sua assinatura foi cancelada. Sua conta continua ativa e você pode usar o Fita normalmente, como no plano gratuito, sem sincronização com a nuvem."
-          : "Acesso simulado enquanto a assinatura estiver ativa. A cobrança real ainda não está conectada."}
+          : cloudSyncEnabled
+            ? "Sua assinatura está ativa. Suas fichas e seu histórico são sincronizados na nuvem enquanto o plano estiver vigente."
+            : "Acesso simulado enquanto a assinatura estiver ativa. A cobrança real ainda não está conectada."}
       </p>
       {account.status === "active" && onCancelSubscription && (
         <button

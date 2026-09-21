@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 import { loadCloudData, saveCloudData } from "@/lib/supabase-data";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { hasDemoCloudAccess, loadDemoAccount } from "@/lib/demo-account";
 
 export type Entry = {
   id: string;
@@ -77,18 +77,24 @@ export function useAppData() {
   const [hydrated, setHydrated] = useState(false);
   const { user, loading: authLoading } = useSupabaseAuth();
   const previousUserId = useRef<string | null>(null);
+  const previousCloudSync = useRef(false);
 
   useEffect(() => {
     if (authLoading) return;
 
     let cancelled = false;
     const localData = read();
+    const demoAccount = loadDemoAccount();
+    const cloudSyncEnabled = Boolean(
+      user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
+    );
 
     if (!user) {
-      const hadPreviousUser = Boolean(previousUserId.current);
-      if (hadPreviousUser) clearLocalCache();
+      const hadCloudSync = previousCloudSync.current;
+      if (hadCloudSync) clearLocalCache();
       previousUserId.current = null;
-      setData(hadPreviousUser || isSupabaseConfigured ? emptyData : localData);
+      previousCloudSync.current = false;
+      setData(hadCloudSync ? emptyData : localData);
       setHydrated(true);
       return () => {
         cancelled = true;
@@ -96,6 +102,15 @@ export function useAppData() {
     }
 
     previousUserId.current = user.id;
+    previousCloudSync.current = cloudSyncEnabled;
+    if (!cloudSyncEnabled) {
+      setData(localData);
+      setHydrated(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     setHydrated(false);
     loadCloudData()
       .then((cloudData) => {
@@ -119,6 +134,11 @@ export function useAppData() {
     };
   }, [authLoading, user]);
 
+  const demoAccount = loadDemoAccount();
+  const cloudSyncEnabled = Boolean(
+    user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
+  );
+
   useEffect(() => {
     const sync = () => setData(read());
     window.addEventListener("medida-viva:changed", sync);
@@ -135,21 +155,21 @@ export function useAppData() {
     const entries = [...others, entry].sort((a, b) => a.date.localeCompare(b.date));
     const nextData = { ...current, entries };
     write(nextData);
-    if (user) persistCloud(nextData);
-  }, [user]);
+    if (cloudSyncEnabled) persistCloud(nextData);
+  }, [cloudSyncEnabled]);
 
   const removeEntry = useCallback((id: string) => {
     const current = read();
     const nextData = { ...current, entries: current.entries.filter((e) => e.id !== id) };
     write(nextData);
-    if (user) persistCloud(nextData);
-  }, [user]);
+    if (cloudSyncEnabled) persistCloud(nextData);
+  }, [cloudSyncEnabled]);
 
   const setRecurrence = useCallback((recurrence: Recurrence) => {
     const nextData = { ...read(), recurrence };
     write(nextData);
-    if (user) persistCloud(nextData);
-  }, [user]);
+    if (cloudSyncEnabled) persistCloud(nextData);
+  }, [cloudSyncEnabled]);
 
   const replaceAll = useCallback((next: AppData) => {
     const nextData = {
@@ -158,8 +178,8 @@ export function useAppData() {
       recurrence: { ...defaultRecurrence, ...(next.recurrence ?? {}) },
     } satisfies AppData;
     write(nextData);
-    if (user) persistCloud(nextData);
-  }, [user]);
+    if (cloudSyncEnabled) persistCloud(nextData);
+  }, [cloudSyncEnabled]);
 
   return { data, hydrated, saveEntry, removeEntry, setRecurrence, replaceAll };
 }

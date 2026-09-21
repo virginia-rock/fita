@@ -5,6 +5,7 @@ import { MembershipStatus } from "@/components/MembershipStatus";
 import {
   cancelDemoSubscription,
   clearDemoAccount,
+  hasDemoCloudAccess,
   loadDemoSession,
   saveDemoAccount,
   type DemoAccount,
@@ -33,6 +34,7 @@ function Conta() {
         createdAt: user.created_at,
       }
     : null);
+  const cloudSyncEnabled = Boolean(user && hasDemoCloudAccess(account));
 
   if (authLoading || !account) {
     return (
@@ -72,6 +74,7 @@ function Conta() {
           <MembershipStatus
             account={account}
             isSupabaseAccount={Boolean(user)}
+            cloudSyncEnabled={cloudSyncEnabled}
             onCancelSubscription={() => {
               const canceled = cancelDemoSubscription(account);
               saveDemoAccount(canceled);
