@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MEASURING_RULES, METRICS, METRIC_GROUPS } from "@/lib/measurements";
 import { toISO, useAppData } from "@/lib/storage";
 
 export const Route = createFileRoute("/nova")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Nova entrada · Fita." },
@@ -28,11 +31,26 @@ export const Route = createFileRoute("/nova")({
 function NovaEntrada() {
   const { data, saveEntry } = useAppData();
   const navigate = useNavigate();
+  const { edit } = Route.useSearch();
+  const editInitialized = useRef<string | null>(null);
   const [date, setDate] = useState(toISO(new Date()));
   const [values, setValues] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
 
+  const editingEntry = edit ? data.entries.find((entry) => entry.id === edit) : undefined;
   const ultima = data.entries[data.entries.length - 1];
+
+  useEffect(() => {
+    if (!edit || !editingEntry || editInitialized.current === edit) return;
+    editInitialized.current = edit;
+    setDate(editingEntry.date);
+    setValues(
+      Object.fromEntries(
+        Object.entries(editingEntry.values).map(([id, value]) => [id, String(value)]),
+      ),
+    );
+    setNote(editingEntry.note ?? "");
+  }, [edit, editingEntry]);
 
   function submit() {
     const parsed: Record<string, number> = {};
@@ -47,8 +65,13 @@ function NovaEntrada() {
       toast.error("Preencha ao menos um campo.");
       return;
     }
-    saveEntry({ id: crypto.randomUUID(), date, values: parsed, ...(note ? { note } : {}) });
-    toast.success("Medição registrada");
+    saveEntry({
+      id: editingEntry?.id ?? crypto.randomUUID(),
+      date,
+      values: parsed,
+      ...(note ? { note } : {}),
+    });
+    toast.success(editingEntry ? "Medição atualizada" : "Medição registrada");
     navigate({ to: "/" });
   }
 
@@ -57,8 +80,10 @@ function NovaEntrada() {
       <div className="rounded-sm bg-vellum/50 p-6 ring-1 ring-ink/5">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-ink/10 pb-4">
           <div>
-            <div className="label-caps text-ink/50">Nova entrada</div>
-            <h1 className="mt-2 text-xl font-medium tracking-tight">Registrar medição</h1>
+            <div className="label-caps text-ink/50">{editingEntry ? "Editar entrada" : "Nova entrada"}</div>
+            <h1 className="mt-2 text-xl font-medium tracking-tight">
+              {editingEntry ? "Editar medição" : "Registrar medição"}
+            </h1>
           </div>
           <label className="flex flex-col gap-1">
             <span className="label-caps text-ink/40">Data</span>
@@ -115,7 +140,7 @@ function NovaEntrada() {
             onClick={submit}
             className="rounded-sm bg-clay px-6 py-3 text-xs font-bold uppercase tracking-widest text-paper"
           >
-            Salvar medição
+            {editingEntry ? "Salvar alterações" : "Salvar medição"}
           </button>
         </div>
       </div>

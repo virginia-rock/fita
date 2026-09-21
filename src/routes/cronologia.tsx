@@ -252,15 +252,25 @@ function Cronologia() {
                   {e.note ? ` · ${e.note}` : ""}
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  removeEntry(e.id);
-                  toast.success("Registro removido");
-                }}
-                className="label-caps rounded-sm bg-paper px-3 py-1.5 text-down ring-1 ring-ink/10"
-              >
-                Excluir
-              </button>
+              <div className="flex gap-2">
+                <Link
+                  to="/nova"
+                  search={{ edit: e.id }}
+                  className="label-caps rounded-sm bg-paper px-3 py-1.5 text-clay ring-1 ring-ink/10"
+                >
+                  Editar
+                </Link>
+                <button
+                  onClick={() => {
+                    if (!window.confirm("Excluir este registro? Essa ação não pode ser desfeita.")) return;
+                    removeEntry(e.id);
+                    toast.success("Registro removido");
+                  }}
+                  className="label-caps rounded-sm bg-paper px-3 py-1.5 text-down ring-1 ring-ink/10"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
           {data.entries.length === 0 && (
