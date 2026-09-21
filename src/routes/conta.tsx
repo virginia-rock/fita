@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { MembershipStatus } from "@/components/MembershipStatus";
+import { useAppData } from "@/lib/storage";
+import { isCloudEntitled } from "@/lib/entitlements";
 import {
   cancelDemoSubscription,
   clearDemoAccount,
-  hasDemoCloudAccess,
   loadDemoSession,
   saveDemoAccount,
   type DemoAccount,
@@ -21,10 +22,11 @@ export const Route = createFileRoute("/conta")({
 function Conta() {
   const [demoAccount, setDemoAccount] = useState<DemoAccount | null>(null);
   const { user, loading: authLoading } = useSupabaseAuth();
+  const { entitlement, entitlementLoading, entitlementError } = useAppData();
 
   useEffect(() => setDemoAccount(loadDemoSession()), []);
 
-  const account = (!isSupabaseConfigured ? demoAccount : demoAccount?.id === user?.id ? demoAccount : null) ?? (user
+  const localAccount = (!isSupabaseConfigured ? demoAccount : demoAccount?.id === user?.id ? demoAccount : null) ?? (user
     ? {
         id: user.id,
         email: user.email ?? "",
@@ -34,9 +36,34 @@ function Conta() {
         createdAt: user.created_at,
       }
     : null);
-  const cloudSyncEnabled = Boolean(user && hasDemoCloudAccess(account));
+  const account = entitlement
+    ? {
+        ...(localAccount ?? {
+          id: entitlement.user_id,
+          email: user?.email ?? "",
+          emailConfirmed: Boolean(user?.email_confirmed_at),
+          createdAt: user?.created_at ?? new Date().toISOString(),
+        }),
+        plan: entitlement.plan,
+        status: entitlement.status,
+        ...(entitlement.expires_at ? { expiresAt: entitlement.expires_at } : {}),
+      }
+    : localAccount;
+  const cloudSyncEnabled = isCloudEntitled(entitlement);
 
-  if (authLoading || !account) {
+  if (authLoading || entitlementLoading) {
+    return (
+      <AppShell showLocalStorageNotice={false}>
+        <div className="mx-auto max-w-md rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
+          <div className="label-caps text-clay">Área da conta</div>
+          <h1 className="mt-3 text-3xl font-medium">Carregando seu plano.</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink/60">Só um instante.</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!account) {
     return (
       <AppShell showLocalStorageNotice={false}>
         <div className="mx-auto max-w-md rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
@@ -71,16 +98,22 @@ function Conta() {
         </div>
 
         <div className="mt-8 space-y-5">
-          <MembershipStatus
-            account={account}
-            isSupabaseAccount={Boolean(user)}
-            cloudSyncEnabled={cloudSyncEnabled}
-            onCancelSubscription={() => {
-              const canceled = cancelDemoSubscription(account);
-              saveDemoAccount(canceled);
-              setDemoAccount(canceled);
-            }}
-          />
+          {entitlementError ? (
+            <div className="rounded-sm bg-clay/10 p-5 text-sm text-clay" role="alert">
+              Não foi possível verificar seu plano no Supabase. Tente novamente em instantes.
+            </div>
+          ) : (
+            <MembershipStatus
+              account={account}
+              isSupabaseAccount={Boolean(user)}
+              cloudSyncEnabled={cloudSyncEnabled}
+              onCancelSubscription={() => {
+                const canceled = cancelDemoSubscription(account);
+                saveDemoAccount(canceled);
+                setDemoAccount(canceled);
+              }}
+            />
+          )}
           <div className="border-t border-ink/10 pt-5">
             <button
               type="button"

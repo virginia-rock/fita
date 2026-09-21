@@ -4,7 +4,8 @@ import { Github } from "lucide-react";
 import { toast } from "sonner";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { exportData, parseImported, useAppData } from "@/lib/storage";
-import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
+import { loadDemoSession } from "@/lib/demo-account";
+import { isCloudEntitled } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
@@ -21,15 +22,11 @@ export function AppShell({
   children: ReactNode;
   showLocalStorageNotice?: boolean;
 }) {
-  const { replaceAll } = useAppData();
+  const { replaceAll, entitlement, entitlementError } = useAppData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [hasDemoSession, setHasDemoSession] = useState(false);
   const { user: supabaseUser, loading: authLoading } = useSupabaseAuth();
-  const demoAccount = loadDemoSession();
-  const cloudSyncEnabled = Boolean(
-    (supabaseUser && demoAccount?.id === supabaseUser.id && hasDemoCloudAccess(demoAccount)) ||
-      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
-  );
+  const cloudSyncEnabled = isCloudEntitled(entitlement);
   const visibleNav = NAV;
 
   useEffect(() => {
@@ -142,7 +139,13 @@ export function AppShell({
       </header>
 
       <div className="mx-auto mt-8 max-w-[1200px] space-y-6 px-6">
-        {showLocalStorageNotice && !cloudSyncEnabled && <LocalStorageNotice />}
+        {entitlementError ? (
+          <div className="rounded-sm bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
+            Não foi possível verificar seu plano Pro. Seus dados não serão sincronizados até a conexão ser restabelecida.
+          </div>
+        ) : (
+          showLocalStorageNotice && !cloudSyncEnabled && <LocalStorageNotice />
+        )}
         <nav className="flex gap-6 border-b border-ink/5 pb-2 text-[11px] font-semibold uppercase tracking-widest">
           {visibleNav.map((item) => (
             <Link

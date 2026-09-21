@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 import { loadCloudData, saveCloudData } from "@/lib/supabase-data";
-import { hasDemoCloudAccess, loadDemoAccount } from "@/lib/demo-account";
+import { activateDemoEntitlement, loadEntitlement } from "@/lib/supabase-entitlements";
+import {
+  canUseCloudSync,
+  shouldMigrateLegacyEntitlement,
+  type Entitlement,
+} from "@/lib/entitlements";
+import { loadDemoAccount } from "@/lib/demo-account";
 
 export type Entry = {
   id: string;
@@ -75,19 +81,62 @@ function persistCloud(data: AppData) {
 export function useAppData() {
   const [data, setData] = useState<AppData>(emptyData);
   const [hydrated, setHydrated] = useState(false);
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
+  const [entitlementLoading, setEntitlementLoading] = useState(false);
+  const [entitlementError, setEntitlementError] = useState<unknown>(null);
   const { user, loading: authLoading } = useSupabaseAuth();
   const previousUserId = useRef<string | null>(null);
   const previousCloudSync = useRef(false);
 
   useEffect(() => {
     if (authLoading) return;
+    if (!user) {
+      setEntitlement(null);
+      setEntitlementLoading(false);
+      setEntitlementError(null);
+      return;
+    }
+
+    let cancelled = false;
+    const legacy = loadDemoAccount();
+    setEntitlementLoading(true);
+    setEntitlementError(null);
+
+    loadEntitlement()
+      .then(async (remote) => {
+        if (
+          remote ||
+          !legacy ||
+          !shouldMigrateLegacyEntitlement(legacy, user.id, remote) ||
+          legacy.plan === "local"
+        ) {
+          return remote;
+        }
+        return activateDemoEntitlement(legacy.plan);
+      })
+      .then((remote) => {
+        if (cancelled) return;
+        setEntitlement(remote);
+        setEntitlementLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setEntitlement(null);
+        setEntitlementLoading(false);
+        setEntitlementError(error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
+
+  useEffect(() => {
+    if (authLoading) return;
 
     let cancelled = false;
     const localData = read();
-    const demoAccount = loadDemoAccount();
-    const cloudSyncEnabled = Boolean(
-      user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
-    );
+    const cloudSyncEnabled = canUseCloudSync(entitlement, entitlementLoading, entitlementError);
 
     if (!user) {
       const hadCloudSync = previousCloudSync.current;
@@ -132,12 +181,9 @@ export function useAppData() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, user]);
+  }, [authLoading, user, entitlement, entitlementLoading, entitlementError]);
 
-  const demoAccount = loadDemoAccount();
-  const cloudSyncEnabled = Boolean(
-    user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
-  );
+  const cloudSyncEnabled = canUseCloudSync(entitlement, entitlementLoading, entitlementError);
 
   useEffect(() => {
     const sync = () => setData(read());
@@ -181,7 +227,17 @@ export function useAppData() {
     if (cloudSyncEnabled) persistCloud(nextData);
   }, [cloudSyncEnabled]);
 
-  return { data, hydrated, saveEntry, removeEntry, setRecurrence, replaceAll };
+  return {
+    data,
+    hydrated,
+    entitlement,
+    entitlementLoading,
+    entitlementError,
+    saveEntry,
+    removeEntry,
+    setRecurrence,
+    replaceAll,
+  };
 }
 
 export function exportData() {

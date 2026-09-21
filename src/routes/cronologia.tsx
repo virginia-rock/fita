@@ -13,8 +13,7 @@ import {
   weekdayName,
   type Recurrence,
 } from "@/lib/storage";
-import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { isCloudEntitled } from "@/lib/entitlements";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
 export const Route = createFileRoute("/cronologia")({
@@ -45,19 +44,15 @@ const TIPOS: { id: Recurrence["type"]; label: string }[] = [
 ];
 
 function Cronologia() {
-  const { data, setRecurrence, removeEntry } = useAppData();
-  const { user, loading: authLoading } = useSupabaseAuth();
-  const demoAccount = loadDemoSession();
-  const cloudSyncEnabled = Boolean(
-    (user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount)) ||
-      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
-  );
+  const { data, setRecurrence, removeEntry, entitlement, entitlementLoading, entitlementError } = useAppData();
+  const { loading: authLoading } = useSupabaseAuth();
+  const cloudSyncEnabled = isCloudEntitled(entitlement);
   const [ref, setRef] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
 
-  if (!authLoading && !cloudSyncEnabled) {
+  if (!authLoading && !entitlementLoading && !entitlementError && !cloudSyncEnabled) {
     return (
       <AppShell>
         <div className="mx-auto max-w-xl rounded-sm bg-vellum/50 p-8 ring-1 ring-ink/10">

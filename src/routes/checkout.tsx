@@ -10,6 +10,7 @@ import {
 } from "@/lib/demo-account";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
+import { activateDemoEntitlement } from "@/lib/supabase-entitlements";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout demo · Fita." }] }),
@@ -25,6 +26,7 @@ function readPlan(): Exclude<DemoPlan, "local"> {
 
 function Checkout() {
   const [demoAccount, setDemoAccount] = useState<DemoAccount | null>(null);
+  const [activationError, setActivationError] = useState("");
   const { user, loading: authLoading } = useSupabaseAuth();
   const [plan] = useState(readPlan);
 
@@ -66,11 +68,22 @@ function Checkout() {
           <SimulatedCheckout
             plan={plan}
             account={account}
-            onComplete={() => {
-              saveDemoAccount(activateDemoPlan(account, plan));
-              window.location.assign("/conta");
+            onComplete={async () => {
+              setActivationError("");
+              try {
+                await activateDemoEntitlement(plan);
+                saveDemoAccount(activateDemoPlan(account, plan));
+                window.location.assign("/conta");
+              } catch {
+                setActivationError("Não foi possível ativar o plano Pro no Supabase. Tente novamente.");
+              }
             }}
           />
+          {activationError && (
+            <div className="mt-5 rounded-sm bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
+              {activationError}
+            </div>
+          )}
         </div>
       </div>
     </main>

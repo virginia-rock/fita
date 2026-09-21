@@ -3,7 +3,7 @@ import type { DemoAccount, DemoPlan } from "@/lib/demo-account";
 type SimulatedCheckoutProps = {
   plan: Exclude<DemoPlan, "local">;
   account: DemoAccount;
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
 };
 
 const PLAN_DETAILS = {
