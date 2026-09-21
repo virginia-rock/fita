@@ -99,7 +99,7 @@ function Landing() {
         <div className="max-w-3xl">
           <div className="label-caps text-clay">Uma fita métrica, uma balança</div>
           <h1 className="mt-5 max-w-2xl text-5xl font-medium leading-[0.98] tracking-[-0.04em] md:text-7xl">
-            Acompanhe sua evolução corporal com clareza, privacidade e rotina.
+            Acompanhe sua evolução corporal.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/65">
             Registre circunferências, peso e composição corporal. Veja o que mudou, crie uma rotina e

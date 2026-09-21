@@ -1,8 +1,6 @@
 ![Logo Fita](https://fita-site.vercel.app/logo.png)
 
-# Fita.
-
-## Acompanhe sua evolução corporal com clareza
+## Fita. Acompanhe sua evolução corporal
 
 O Fita. é um aplicativo simples para registrar medidas corporais, acompanhar mudanças ao longo do tempo e criar uma rotina de acompanhamento.
 

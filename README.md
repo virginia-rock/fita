@@ -2,7 +2,7 @@
 
 ![Logo Fita](./public/logo.png)
 
-## Acompanhe sua evolução corporal com clareza
+## Acompanhe sua evolução corporal
 
 O Fita. é um web app leve e privado para registrar medidas corporais, peso e composição corporal ao longo do tempo. Acompanhe suas mudanças em um painel objetivo, visualize tendências e crie uma rotina de medições sem depender de planilhas.
 
