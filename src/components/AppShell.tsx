@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { exportData, parseImported, useAppData } from "@/lib/storage";
 import { createPixPayload, PIX_KEY } from "@/lib/pix";
-import { hasDemoCloudAccess, loadDemoSession } from "@/lib/demo-account";
+import { loadDemoSession } from "@/lib/demo-account";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
@@ -46,12 +46,7 @@ export function AppShell({
   const [copied, setCopied] = useState(false);
   const [hasDemoSession, setHasDemoSession] = useState(false);
   const { user: supabaseUser, loading: authLoading } = useSupabaseAuth();
-  const demoAccount = loadDemoSession();
-  const cloudSyncEnabled = Boolean(
-    (supabaseUser && demoAccount?.id === supabaseUser.id && hasDemoCloudAccess(demoAccount)) ||
-      (!isSupabaseConfigured && hasDemoCloudAccess(demoAccount)),
-  );
-  const visibleNav = cloudSyncEnabled ? NAV : NAV.filter((item) => item.to !== "/cronologia");
+  const visibleNav = NAV;
 
   useEffect(() => {
     if (!authLoading) {
