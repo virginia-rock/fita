@@ -41,7 +41,7 @@ function Conta() {
           <div className="label-caps text-clay">Área da conta</div>
           <h1 className="mt-3 text-3xl font-medium">Entre para continuar.</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            A área de pagamentos e assinaturas fica disponível depois que você cria uma conta demo.
+            A área de pagamentos e assinaturas fica disponível depois que você cria uma conta.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/entrar" className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
@@ -71,6 +71,7 @@ function Conta() {
         <div className="mt-8 space-y-5">
           <MembershipStatus
             account={account}
+            isSupabaseAccount={Boolean(user)}
             onCancelSubscription={() => {
               const canceled = cancelDemoSubscription(account);
               saveDemoAccount(canceled);

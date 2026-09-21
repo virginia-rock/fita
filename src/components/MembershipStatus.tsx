@@ -2,17 +2,20 @@ import type { DemoAccount } from "@/lib/demo-account";
 
 type MembershipStatusProps = {
   account: DemoAccount | null;
+  isSupabaseAccount?: boolean;
   onCancelSubscription?: () => void;
 };
 
-export function MembershipStatus({ account, onCancelSubscription }: MembershipStatusProps) {
+export function MembershipStatus({ account, isSupabaseAccount = false, onCancelSubscription }: MembershipStatusProps) {
   if (!account || account.plan === "local") {
     return (
       <div className="rounded-sm bg-vellum/50 p-5 ring-1 ring-ink/10">
         <div className="label-caps text-ink/45">Plano atual</div>
-        <h2 className="mt-2 text-xl font-medium">Teste local</h2>
+        <h2 className="mt-2 text-xl font-medium">{isSupabaseAccount ? "Plano gratuito" : "Teste local"}</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink/60">
-          Você está usando o Fita sem cadastro e sem armazenamento em nuvem.
+          {isSupabaseAccount
+            ? "Sua conta está conectada ao Supabase. As fichas e o histórico são sincronizados na nuvem."
+            : "Você está usando o Fita sem cadastro e sem armazenamento em nuvem."}
         </p>
       </div>
     );
