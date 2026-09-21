@@ -69,14 +69,21 @@ e o histórico com o Supabase enquanto estiverem ativos.
 
 The Supabase integration is required for production authentication and cloud data. Copy `.env.example` to `.env.local`, fill
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, and apply
-`supabase/migrations/20260921000000_create_fita_data.sql` in the Supabase SQL
-Editor (or through the Supabase CLI).
+`supabase/migrations/20260921000000_create_fita_data.sql` and
+`supabase/migrations/20260921000001_create_fita_entitlements.sql` in the
+Supabase SQL Editor (or through the Supabase CLI).
 
 Authentication uses the signed-in user's Supabase session. Free accounts keep
 their data locally; active Pro accounts also synchronize with the cloud.
 The `fita_data` table uses RLS so each authenticated user can access only their
 own row. Never expose a `service_role` or secret key in browser environment
 variables.
+
+The demo checkout activates the Pro entitlement through the
+`activate_demo_entitlement` RPC. A production payment integration should
+replace that demo operation with a server-side Stripe webhook that writes to
+`fita_entitlements` using `source = 'stripe'`; the browser must not decide its
+own paid status.
 
 ## Desenvolvimento local
 
