@@ -109,7 +109,7 @@ export function AppShell({
             }}
           />
           <a
-            href="https://github.com/carlospessin/fita"
+            href="https://gist.github.com/carlospessin/23e86da496433e13d9bb05ccade2a2bb"
             target="_blank"
             rel="noreferrer"
             aria-label="Abrir o projeto Fita no GitHub"

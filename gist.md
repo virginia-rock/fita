@@ -65,6 +65,12 @@ O Fita. não substitui orientação médica, nutricional ou profissional. Ele é
 
 Os fluxos de pagamento apresentados atualmente são demonstrativos. A interface mostra como funcionam o pagamento único, a assinatura e a área da conta, mas a cobrança real ainda será conectada posteriormente.
 
+### Contratação em grupo
+
+O Fita. também oferece uma opção para grupos de pessoas ou empresas que desejam contratar o serviço em condições exclusivas. O contato pode ser iniciado pelo formulário na seção de planos, com nome, e-mail, empresa, WhatsApp e descrição da necessidade.
+
+Nome, e-mail e descrição são obrigatórios. Ao enviar, o Fita. abre o cliente de e-mail do usuário com uma mensagem pronta para carlospessin@gmail.com.
+
 ## Para quem é o Fita.
 
 O Fita. é para pessoas que querem:
