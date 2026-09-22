@@ -70,7 +70,7 @@ export function GroupContactModal({ open, onOpenChange }: GroupContactModalProps
             Vamos conversar sobre o seu grupo.
           </DialogTitle>
           <DialogDescription className="mt-2 text-sm leading-relaxed text-ink/60">
-            Conte um pouco sobre o que você precisa. Ao enviar, abriremos seu cliente de e-mail com a mensagem pronta para carlospessin@gmail.com.
+            Conte um pouco sobre o que você precisa.
           </DialogDescription>
         </DialogHeader>
 
