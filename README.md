@@ -61,9 +61,14 @@ modificação e distribuição mantendo o aviso de autoria.
 ## Planos e pagamentos
 
 O projeto inclui uma landing page e fluxos visuais de conta, planos e checkout.
-Nesta versão, os pagamentos continuam simulados. O plano gratuito exige login,
-mas mantém os dados somente neste navegador. Os planos Pro sincronizam as fichas
-e o histórico com o Supabase enquanto estiverem ativos.
+O plano gratuito exige login, mas mantém os dados somente neste navegador. Os
+planos Pro sincronizam as fichas e o histórico com o Supabase enquanto estiverem
+ativos.
+
+O checkout Stripe usa `mode=payment` para o pagamento único de R$ 29,90 e
+`mode=subscription` para a assinatura recorrente de R$ 19,90/mês. O navegador
+apenas solicita uma Checkout Session e redireciona para o Stripe; o acesso Pro
+só é concedido pelo webhook após a confirmação do pagamento.
 
 ## Supabase
 
@@ -79,11 +84,21 @@ The `fita_data` table uses RLS so each authenticated user can access only their
 own row. Never expose a `service_role` or secret key in browser environment
 variables.
 
-The demo checkout activates the Pro entitlement through the
-`activate_demo_entitlement` RPC. A production payment integration should
-replace that demo operation with a server-side Stripe webhook that writes to
-`fita_entitlements` using `source = 'stripe'`; the browser must not decide its
-own paid status.
+The demo activation remains available for local development. The Stripe
+integration uses the `create-checkout-session` and `stripe-webhook` Supabase
+Edge Functions. The webhook writes to `fita_entitlements` using
+`source = 'stripe'`; the browser must not decide its own paid status.
+
+### Configuração Stripe em test mode
+
+1. Crie no Stripe dois Prices em BRL: um único de R$ 29,90 e um recorrente mensal de R$ 19,90.
+2. Configure os segredos das Edge Functions com `supabase secrets set` ou no ambiente de deploy.
+3. Aplique também `supabase/migrations/20260922000000_add_stripe_billing.sql`.
+4. Faça deploy de `create-checkout-session` e `stripe-webhook`.
+5. Cadastre o endpoint `/functions/v1/stripe-webhook` no Stripe para os eventos documentados nas instruções da função.
+
+Nunca versione `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` ou
+`SUPABASE_SERVICE_ROLE_KEY`, nem os coloque em variáveis `VITE_*`.
 
 ## Desenvolvimento local
 

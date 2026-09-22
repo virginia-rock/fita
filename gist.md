@@ -63,7 +63,9 @@ O Fita. não substitui orientação médica, nutricional ou profissional. Ele é
 
 ## Pagamentos
 
-Os fluxos de pagamento apresentados atualmente são demonstrativos. A interface mostra como funcionam o pagamento único, a assinatura e a área da conta, mas a cobrança real ainda será conectada posteriormente.
+O checkout Stripe usa o pagamento único de R$ 29,90 e a assinatura recorrente de R$ 19,90 por mês. O navegador apenas redireciona para o Checkout hospedado do Stripe; o acesso Pro é liberado somente depois que o webhook confirma o pagamento e atualiza o entitlement no Supabase.
+
+Os valores de `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, os Price IDs e a chave `SUPABASE_SERVICE_ROLE_KEY` devem ser configurados somente no ambiente das Edge Functions, nunca no frontend ou no repositório.
 
 ### Contratação em grupo
 
