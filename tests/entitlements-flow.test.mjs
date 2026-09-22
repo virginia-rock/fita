@@ -41,11 +41,13 @@ test("matching legacy local Pro can be migrated only when remote data is absent"
     id: "user-1",
     plan: "cloud_month",
     status: "active",
-    expiresAt: "2026-09-22T12:00:00.000Z",
+    expiresAt: "2026-12-22T12:00:00.000Z",
   };
 
-  assert.equal(shouldMigrateLegacyEntitlement(legacy, "user-1", null), true);
-  assert.equal(shouldMigrateLegacyEntitlement(legacy, "other-user", null), false);
+  const now = new Date("2026-09-22T12:00:00.000Z");
+
+  assert.equal(shouldMigrateLegacyEntitlement(legacy, "user-1", null, now), true);
+  assert.equal(shouldMigrateLegacyEntitlement(legacy, "other-user", null, now), false);
   assert.equal(
     shouldMigrateLegacyEntitlement(legacy, "user-1", {
       user_id: "user-1",
