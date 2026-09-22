@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Github } from "lucide-react";
 import { useState } from "react";
 import { AccountModal } from "@/components/AccountModal";
+import { GroupContactModal } from "@/components/GroupContactModal";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { PlanCard } from "@/components/PlanCard";
 import { hasDemoCloudAccess, loadDemoSession, type DemoPlan } from "@/lib/demo-account";
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [accountModalPlan, setAccountModalPlan] = useState<DemoPlan | null>(null);
+  const [groupContactOpen, setGroupContactOpen] = useState(false);
   const { user, loading: authLoading } = useSupabaseAuth();
   const demoAccount = loadDemoSession();
   const hasProAccess = Boolean(
@@ -94,6 +96,7 @@ function Landing() {
           }}
         />
       )}
+      <GroupContactModal open={groupContactOpen} onOpenChange={setGroupContactOpen} />
 
       <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-12 md:pb-28 md:pt-24">
         <div className="max-w-3xl">
@@ -142,7 +145,7 @@ function Landing() {
             Crie sua conta para começar no plano gratuito ou escolha uma opção Pro com armazenamento em nuvem.
           </p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-3">
           <PlanCard
             name="Acesso mensal"
             price="R$ 29,90"
@@ -161,6 +164,15 @@ function Landing() {
             actionLabel="Assinar"
             featured
             onAction={() => handlePlan("subscription")}
+          />
+          <PlanCard
+            name="Plano para grupos"
+            price="Sob consulta"
+            cadence="condições exclusivas"
+            description="Quer contratar o Fita. para um grupo de pessoas? Entre em contato para condições exclusivas."
+            features={["Atendimento personalizado", "Condições para grupos", "Solução sob medida"]}
+            actionLabel="Entrar em contato"
+            onAction={() => setGroupContactOpen(true)}
           />
         </div>
       </section>
