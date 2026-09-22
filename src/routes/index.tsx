@@ -75,7 +75,7 @@ function Landing() {
             {user ? "Minha conta" : "Entrar no app"}
           </button>
           <a
-            href="https://gist.github.com/carlospessin/23e86da496433e13d9bb05ccade2a2bb"
+            href="https://gist.github.com/carlospessin/0b0552ef132cb9bdf51a95149658863c"
             target="_blank"
             rel="noreferrer"
             aria-label="Abrir o projeto Fita no GitHub"
