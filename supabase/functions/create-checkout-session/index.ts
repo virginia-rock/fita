@@ -32,13 +32,12 @@ Deno.serve(async (request) => {
 
   try {
     const authorization = request.headers.get("Authorization");
-    if (!authorization?.startsWith("Bearer ")) return json({ error: "Authentication required." }, 401);
+    if (!authorization?.startsWith("Bearer "))
+      return json({ error: "Authentication required." }, 401);
 
-    const supabase = createClient(
-      requiredEnv("SUPABASE_URL"),
-      requiredEnv("SUPABASE_ANON_KEY"),
-      { global: { headers: { Authorization: authorization } } },
-    );
+    const supabase = createClient(requiredEnv("SUPABASE_URL"), requiredEnv("SUPABASE_ANON_KEY"), {
+      global: { headers: { Authorization: authorization } },
+    });
     const { data, error: authError } = await supabase.auth.getUser();
     if (authError || !data.user) return json({ error: "Authentication required." }, 401);
 
@@ -54,6 +53,7 @@ Deno.serve(async (request) => {
       client_reference_id: data.user.id,
       customer_email: data.user.email ?? undefined,
       metadata,
+      ...(plan === "subscription" ? { subscription_data: { metadata } } : {}),
       success_url: `${baseUrl}/conta?stripe=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout?plan=${plan}&stripe=cancelled`,
     });
@@ -62,7 +62,11 @@ Deno.serve(async (request) => {
     return json({ url: session.url });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to create Checkout session.";
-    const status = /Authentication required/.test(message) ? 401 : /not configured/i.test(message) ? 503 : 400;
+    const status = /Authentication required/.test(message)
+      ? 401
+      : /not configured/i.test(message)
+        ? 503
+        : 400;
     return json({ error: status === 503 ? "Stripe is not configured yet." : message }, status);
   }
 });

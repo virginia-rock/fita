@@ -29,3 +29,10 @@ test("creates a private idempotency table for Stripe events", async () => {
   assert.match(sql, /event_type text not null/);
   assert.match(sql, /revoke all on table public\.fita_stripe_events from public, anon, authenticated/);
 });
+
+test("provides a transactional Stripe entitlement RPC", async () => {
+  const sql = await readFile(migrationPath, "utf8");
+  assert.match(sql, /create or replace function public\.apply_stripe_entitlement_event/);
+  assert.match(sql, /on conflict \(event_id\) do nothing/);
+  assert.match(sql, /insert into public\.fita_entitlements/);
+});
