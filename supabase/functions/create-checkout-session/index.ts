@@ -50,6 +50,7 @@ Deno.serve(async (request) => {
     const session = await stripe.checkout.sessions.create({
       mode: plan === "subscription" ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
       client_reference_id: data.user.id,
       customer_email: data.user.email ?? undefined,
       metadata,

@@ -13,3 +13,6 @@ Variáveis necessárias:
 
 O cliente envia apenas `cloud_month` ou `subscription`. A função escolhe o
 Price ID no ambiente e nunca aceita um Price ID vindo do navegador.
+
+A sessÃ£o habilita `allow_promotion_codes`, entÃ£o cupons precisam ser criados
+e ativados como Promotion Codes no Stripe Dashboard.
