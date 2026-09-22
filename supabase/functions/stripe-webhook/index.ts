@@ -1,6 +1,7 @@
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { mapStripeEventToEntitlement } from "../_shared/stripe-event-mapper.ts";
+import { webhookFailureStatus } from "../_shared/webhook-contract.ts";
 
 function requiredEnv(name: string) {
   const value = Deno.env.get(name)?.trim();
@@ -107,6 +108,6 @@ Deno.serve(async (request) => {
       "Stripe webhook processing failed",
       error instanceof Error ? error.message : "unknown error",
     );
-    return json({ error: "Webhook could not be processed." }, 400);
+    return json({ error: "Webhook could not be processed." }, webhookFailureStatus(error));
   }
 });
