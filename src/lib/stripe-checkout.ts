@@ -11,8 +11,14 @@ export async function createStripeCheckoutSession(plan: StripePaidPlan): Promise
   );
   if (error) throw new Error("Não foi possível iniciar o Checkout Stripe.");
 
-  if (!data || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
-    throw new Error(typeof data?.error === "string" ? data.error : "O Stripe não retornou uma URL válida.");
+  if (
+    !data ||
+    typeof data.url !== "string" ||
+    !data.url.startsWith("https://checkout.stripe.com/")
+  ) {
+    throw new Error(
+      typeof data?.error === "string" ? data.error : "O Stripe não retornou uma URL válida.",
+    );
   }
 
   return { url: data.url };

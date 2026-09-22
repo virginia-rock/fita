@@ -8,9 +8,8 @@ export function parsePaidPlan(value: unknown): PaidPlan | null {
 }
 
 export function priceIdForPlan(plan: PaidPlan, env: StripeEnv): string {
-  const priceId = plan === "cloud_month"
-    ? env.STRIPE_PRICE_CLOUD_MONTH
-    : env.STRIPE_PRICE_SUBSCRIPTION;
+  const priceId =
+    plan === "cloud_month" ? env.STRIPE_PRICE_CLOUD_MONTH : env.STRIPE_PRICE_SUBSCRIPTION;
 
   if (!priceId?.trim()) {
     throw new Error(`Stripe Price ID is not configured for ${plan}.`);
