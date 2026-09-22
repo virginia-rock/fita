@@ -28,16 +28,18 @@ function Conta() {
 
   useEffect(() => setDemoAccount(loadDemoSession()), []);
 
-  const localAccount = (!isSupabaseConfigured ? demoAccount : demoAccount?.id === user?.id ? demoAccount : null) ?? (user
-    ? {
-        id: user.id,
-        email: user.email ?? "",
-        emailConfirmed: Boolean(user.email_confirmed_at),
-        plan: "local" as const,
-        status: "active" as const,
-        createdAt: user.created_at,
-      }
-    : null);
+  const localAccount =
+    (!isSupabaseConfigured ? demoAccount : demoAccount?.id === user?.id ? demoAccount : null) ??
+    (user
+      ? {
+          id: user.id,
+          email: user.email ?? "",
+          emailConfirmed: Boolean(user.email_confirmed_at),
+          plan: "local" as const,
+          status: "active" as const,
+          createdAt: user.created_at,
+        }
+      : null);
   const account = entitlement
     ? {
         ...(localAccount ?? {
@@ -75,10 +77,16 @@ function Conta() {
             A área de pagamentos e assinaturas fica disponível depois que você cria uma conta.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/entrar" className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
+            <Link
+              to="/entrar"
+              className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper"
+            >
               Entrar
             </Link>
-            <Link to="/criar-conta" className="rounded-sm bg-vellum px-4 py-3 text-xs font-medium uppercase tracking-widest text-ink/70 ring-1 ring-ink/10">
+            <Link
+              to="/criar-conta"
+              className="rounded-sm bg-vellum px-4 py-3 text-xs font-medium uppercase tracking-widest text-ink/70 ring-1 ring-ink/10"
+            >
               Criar conta
             </Link>
           </div>
@@ -109,6 +117,7 @@ function Conta() {
               account={account}
               isSupabaseAccount={Boolean(user)}
               cloudSyncEnabled={cloudSyncEnabled}
+              entitlementSource={entitlement?.source}
               onCancelSubscription={async () => {
                 setSubscriptionError("");
                 try {
