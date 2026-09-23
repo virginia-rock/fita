@@ -1,4 +1,12 @@
-export type EntitlementPlan = "local" | "cloud_month" | "subscription";
+export type EntitlementPlan =
+  | "local"
+  | "cloud_month"
+  | "subscription"
+  | "subscription_monthly"
+  | "subscription_annual"
+  | "professional_personal"
+  | "professional_personal_pro"
+  | "professional_studio";
 export type EntitlementStatus = "active" | "expired" | "canceled" | "pending";
 export type EntitlementSource = "demo" | "stripe";
 
@@ -10,7 +18,16 @@ export type Entitlement = {
   source: EntitlementSource;
 };
 
-const plans: EntitlementPlan[] = ["local", "cloud_month", "subscription"];
+const plans: EntitlementPlan[] = [
+  "local",
+  "cloud_month",
+  "subscription",
+  "subscription_monthly",
+  "subscription_annual",
+  "professional_personal",
+  "professional_personal_pro",
+  "professional_studio",
+];
 const statuses: EntitlementStatus[] = ["active", "expired", "canceled", "pending"];
 const sources: EntitlementSource[] = ["demo", "stripe"];
 
@@ -18,11 +35,11 @@ export function parseEntitlement(value: unknown): Entitlement | null {
   if (!value || typeof value !== "object") return null;
   const row = value as Record<string, unknown>;
   if (
-    typeof row.user_id !== "string" ||
-    !plans.includes(row.plan as EntitlementPlan) ||
-    !statuses.includes(row.status as EntitlementStatus) ||
-    !sources.includes(row.source as EntitlementSource) ||
-    (row.expires_at !== null && typeof row.expires_at !== "string")
+    typeof row["user_id"] !== "string" ||
+    !plans.includes(row["plan"] as EntitlementPlan) ||
+    !statuses.includes(row["status"] as EntitlementStatus) ||
+    !sources.includes(row["source"] as EntitlementSource) ||
+    (row["expires_at"] !== null && typeof row["expires_at"] !== "string")
   ) {
     return null;
   }
@@ -31,7 +48,12 @@ export function parseEntitlement(value: unknown): Entitlement | null {
 
 export function isCloudEntitled(entitlement: Entitlement | null, now = new Date()) {
   if (!entitlement || entitlement.status !== "active") return false;
-  if (entitlement.plan === "subscription") return true;
+  if (
+    entitlement.plan === "subscription" ||
+    entitlement.plan.startsWith("subscription_") ||
+    entitlement.plan.startsWith("professional_")
+  )
+    return true;
   if (entitlement.plan !== "cloud_month" || !entitlement.expires_at) return false;
   const expiresAt = new Date(entitlement.expires_at);
   return !Number.isNaN(expiresAt.getTime()) && expiresAt > now;
@@ -63,7 +85,8 @@ export function shouldMigrateLegacyEntitlement(
     legacy.id !== userId ||
     !plans.includes(legacy.plan as EntitlementPlan) ||
     !statuses.includes(legacy.status as EntitlementStatus)
-  ) return false;
+  )
+    return false;
   if (legacy.plan === "local") return false;
   return isCloudEntitled(
     {

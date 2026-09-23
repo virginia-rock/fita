@@ -1,6 +1,14 @@
 export const DEMO_ACCOUNT_KEY = "fita.demo-account";
 
-export type DemoPlan = "local" | "cloud_month" | "subscription";
+export type DemoPlan =
+  | "local"
+  | "cloud_month"
+  | "subscription"
+  | "subscription_monthly"
+  | "subscription_annual"
+  | "professional_personal"
+  | "professional_personal_pro"
+  | "professional_studio";
 export type DemoStatus = "anonymous" | "pending" | "active" | "expired" | "canceled";
 
 export type DemoAccount = {
@@ -15,7 +23,14 @@ export type DemoAccount = {
 };
 
 const isPlan = (value: unknown): value is DemoPlan =>
-  value === "local" || value === "cloud_month" || value === "subscription";
+  value === "local" ||
+  value === "cloud_month" ||
+  value === "subscription" ||
+  value === "subscription_monthly" ||
+  value === "subscription_annual" ||
+  value === "professional_personal" ||
+  value === "professional_personal_pro" ||
+  value === "professional_studio";
 
 const isStatus = (value: unknown): value is DemoStatus =>
   value === "anonymous" ||
@@ -110,12 +125,17 @@ export function activateDemoPlan(
 }
 
 export function cancelDemoSubscription(account: DemoAccount): DemoAccount {
-  if (account.plan !== "subscription") return account;
+  if (!account.plan.startsWith("subscription")) return account;
   return { ...account, status: "canceled" };
 }
 
 export function hasDemoCloudAccess(account: DemoAccount | null, now = new Date()) {
   if (!account || account.status !== "active") return false;
-  if (account.plan === "subscription") return true;
+  if (
+    account.plan === "subscription" ||
+    account.plan.startsWith("subscription_") ||
+    account.plan.startsWith("professional_")
+  )
+    return true;
   return Boolean(account.expiresAt && new Date(account.expiresAt) > now);
 }

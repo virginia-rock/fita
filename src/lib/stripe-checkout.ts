@@ -1,6 +1,13 @@
 import { supabase } from "./supabase";
 
-export type StripePaidPlan = "cloud_month" | "subscription";
+export type StripePaidPlan =
+  | "cloud_month"
+  | "subscription"
+  | "subscription_monthly"
+  | "subscription_annual"
+  | "professional_personal"
+  | "professional_personal_pro"
+  | "professional_studio";
 
 export async function createStripeCheckoutSession(plan: StripePaidPlan): Promise<{ url: string }> {
   if (!supabase) throw new Error("O Supabase não está configurado para iniciar o pagamento.");

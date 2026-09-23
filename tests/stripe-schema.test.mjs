@@ -27,7 +27,10 @@ test("creates a private idempotency table for Stripe events", async () => {
   assert.match(sql, /create table if not exists public\.fita_stripe_events/);
   assert.match(sql, /event_id text primary key/);
   assert.match(sql, /event_type text not null/);
-  assert.match(sql, /revoke all on table public\.fita_stripe_events from public, anon, authenticated/);
+  assert.match(
+    sql,
+    /revoke all on table public\.fita_stripe_events from public, anon, authenticated/,
+  );
 });
 
 test("provides a transactional Stripe entitlement RPC", async () => {
@@ -35,4 +38,23 @@ test("provides a transactional Stripe entitlement RPC", async () => {
   assert.match(sql, /create or replace function public\.apply_stripe_entitlement_event/);
   assert.match(sql, /on conflict \(event_id\) do nothing/);
   assert.match(sql, /insert into public\.fita_entitlements/);
+});
+
+test("allows new Pro and professional Stripe plan identifiers", async () => {
+  const sql = await readFile(
+    new URL(
+      "../supabase/migrations/20260923000001_add_professional_stripe_plans.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  for (const plan of [
+    "subscription_monthly",
+    "subscription_annual",
+    "professional_personal",
+    "professional_personal_pro",
+    "professional_studio",
+  ]) {
+    assert.match(sql, new RegExp(plan));
+  }
 });

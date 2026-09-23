@@ -1,7 +1,7 @@
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { checkoutMetadata, parseCheckoutRequest } from "../_shared/checkout-contract.ts";
-import { priceIdForPlan } from "../_shared/stripe-config.ts";
+import { isSubscriptionPlan, priceIdForPlan } from "../_shared/stripe-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,13 +48,13 @@ Deno.serve(async (request) => {
     const baseUrl = appUrl();
 
     const session = await stripe.checkout.sessions.create({
-      mode: plan === "subscription" ? "subscription" : "payment",
+      mode: isSubscriptionPlan(plan) ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
       client_reference_id: data.user.id,
       customer_email: data.user.email ?? undefined,
       metadata,
-      ...(plan === "subscription" ? { subscription_data: { metadata } } : {}),
+      ...(isSubscriptionPlan(plan) ? { subscription_data: { metadata } } : {}),
       success_url: `${baseUrl}/conta?stripe=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout?plan=${plan}&stripe=cancelled`,
     });

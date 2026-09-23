@@ -8,3 +8,5 @@ Task 1: complete — professional plan catalog and limit contract, tests: node -
 Task 2: complete — landing pricing/hero and professional MVP route at /profissional, tests: node --test tests/*.test.mjs → 34/34 pass; npm run build → pass; targeted eslint → pass.
 
 Final review: self-review (no subagent tool). The implementation is intentionally local/demo-only for professional workspace data; existing repository-wide typecheck/lint issues were not introduced by this change.
+
+Follow-up complete: Stripe Price IDs are now environment-driven for `subscription_monthly`, `subscription_annual`, `professional_personal`, `professional_personal_pro`, and `professional_studio`; legacy identifiers remain supported. Verification: 35/35 tests, production build, targeted ESLint, and `git diff --check` passed.

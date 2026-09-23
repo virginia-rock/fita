@@ -11,13 +11,20 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function readPlan(): Exclude<DemoPlan, "local"> {
-  if (
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("plan") === "subscription"
-  ) {
-    return "subscription";
-  }
-  return "cloud_month";
+  const value =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("plan") : null;
+  const plans: Exclude<DemoPlan, "local">[] = [
+    "cloud_month",
+    "subscription",
+    "subscription_monthly",
+    "subscription_annual",
+    "professional_personal",
+    "professional_personal_pro",
+    "professional_studio",
+  ];
+  return plans.includes(value as Exclude<DemoPlan, "local">)
+    ? (value as Exclude<DemoPlan, "local">)
+    : "cloud_month";
 }
 
 function Checkout() {
@@ -49,12 +56,12 @@ function Checkout() {
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
             Você precisa de uma conta para continuar com o acesso pago.
           </p>
-          <Link
-            to="/criar-conta"
+          <a
+            href={`/criar-conta?plan=${plan}`}
             className="mt-8 inline-block rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper"
           >
             Criar conta
-          </Link>
+          </a>
         </div>
       </main>
     );

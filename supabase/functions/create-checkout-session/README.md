@@ -1,18 +1,32 @@
 # create-checkout-session
 
-Cria uma Checkout Session hospedada no Stripe para um usuário autenticado.
+Creates a hosted Stripe Checkout Session for an authenticated user.
 
-Variáveis necessárias:
+Required environment variables:
 
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 - `STRIPE_SECRET_KEY`
-- `STRIPE_PRICE_CLOUD_MONTH`
-- `STRIPE_PRICE_SUBSCRIPTION`
 - `PUBLIC_APP_URL`
+- `STRIPE_PRICE_CLOUD_MONTH`
+- `STRIPE_PRICE_SUBSCRIPTION` (legacy compatibility)
+- `STRIPE_PRICE_PRO_MONTHLY`
+- `STRIPE_PRICE_PRO_ANNUAL`
+- `STRIPE_PRICE_PERSONAL`
+- `STRIPE_PRICE_PERSONAL_PRO`
+- `STRIPE_PRICE_STUDIO`
 
-O cliente envia apenas `cloud_month` ou `subscription`. A função escolhe o
-Price ID no ambiente e nunca aceita um Price ID vindo do navegador.
+Accepted plan identifiers:
 
-A sessÃ£o habilita `allow_promotion_codes`, entÃ£o cupons precisam ser criados
-e ativados como Promotion Codes no Stripe Dashboard.
+- `cloud_month` (legacy one-time plan)
+- `subscription` (legacy recurring plan)
+- `subscription_monthly`
+- `subscription_annual`
+- `professional_personal`
+- `professional_personal_pro`
+- `professional_studio`
+
+The browser sends only the plan identifier. The function resolves the Stripe
+Price ID from environment variables and never accepts a Price ID from the
+browser. Recurring plans use Stripe subscription mode and the legacy
+`cloud_month` plan uses payment mode.

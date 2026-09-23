@@ -23,6 +23,31 @@ const PLAN_DETAILS = {
     price: "R$ 19,90/mês",
     description: "Assinatura recorrente com acesso enquanto estiver ativa.",
   },
+  subscription_monthly: {
+    name: "Fita Pro mensal",
+    price: "R$ 14,90/mês",
+    description: "Assinatura recorrente com sincronização e backup na nuvem.",
+  },
+  subscription_annual: {
+    name: "Fita Pro anual",
+    price: "R$ 119,90/ano",
+    description: "Assinatura anual com o melhor custo-benefício do Fita Pro.",
+  },
+  professional_personal: {
+    name: "Fita Personal",
+    price: "R$ 39,90/mês",
+    description: "Acompanhe até 10 alunos com medidas, avaliações e histórico.",
+  },
+  professional_personal_pro: {
+    name: "Fita Personal Pro",
+    price: "R$ 69,90/mês",
+    description: "Acompanhe até 30 alunos com dashboard e relatórios.",
+  },
+  professional_studio: {
+    name: "Fita Studio",
+    price: "R$ 149/mês",
+    description: "Acompanhe até 100 alunos em uma operação profissional.",
+  },
 } as const;
 
 export function StripeCheckout({ plan, account }: StripeCheckoutProps) {

@@ -1,15 +1,44 @@
-export type PaidPlan = "cloud_month" | "subscription";
+export type PaidPlan =
+  | "cloud_month"
+  | "subscription"
+  | "subscription_monthly"
+  | "subscription_annual"
+  | "professional_personal"
+  | "professional_personal_pro"
+  | "professional_studio";
 
 type StripeEnv = Record<string, string | undefined>;
 
 export function parsePaidPlan(value: unknown): PaidPlan | null {
-  if (value === "cloud_month" || value === "subscription") return value;
+  if (
+    value === "cloud_month" ||
+    value === "subscription" ||
+    value === "subscription_monthly" ||
+    value === "subscription_annual" ||
+    value === "professional_personal" ||
+    value === "professional_personal_pro" ||
+    value === "professional_studio"
+  )
+    return value;
   return null;
 }
 
+const priceEnvByPlan: Record<PaidPlan, string> = {
+  cloud_month: "STRIPE_PRICE_CLOUD_MONTH",
+  subscription: "STRIPE_PRICE_SUBSCRIPTION",
+  subscription_monthly: "STRIPE_PRICE_PRO_MONTHLY",
+  subscription_annual: "STRIPE_PRICE_PRO_ANNUAL",
+  professional_personal: "STRIPE_PRICE_PERSONAL",
+  professional_personal_pro: "STRIPE_PRICE_PERSONAL_PRO",
+  professional_studio: "STRIPE_PRICE_STUDIO",
+};
+
+export function isSubscriptionPlan(plan: PaidPlan) {
+  return plan !== "cloud_month";
+}
+
 export function priceIdForPlan(plan: PaidPlan, env: StripeEnv): string {
-  const priceId =
-    plan === "cloud_month" ? env.STRIPE_PRICE_CLOUD_MONTH : env.STRIPE_PRICE_SUBSCRIPTION;
+  const priceId = env[priceEnvByPlan[plan]];
 
   if (!priceId?.trim()) {
     throw new Error(`Stripe Price ID is not configured for ${plan}.`);
@@ -19,11 +48,10 @@ export function priceIdForPlan(plan: PaidPlan, env: StripeEnv): string {
 }
 
 export function planForPriceId(priceId: string, env: StripeEnv): PaidPlan | null {
-  const cloudMonth = env.STRIPE_PRICE_CLOUD_MONTH?.trim();
-  const subscription = env.STRIPE_PRICE_SUBSCRIPTION?.trim();
-
-  if (!cloudMonth || !subscription || cloudMonth === subscription) return null;
-  if (priceId === cloudMonth) return "cloud_month";
-  if (priceId === subscription) return "subscription";
-  return null;
+  const configured = (Object.keys(priceEnvByPlan) as PaidPlan[])
+    .map((plan) => [plan, env[priceEnvByPlan[plan]]?.trim()] as const)
+    .filter((entry): entry is readonly [PaidPlan, string] => Boolean(entry[1]));
+  const matching = configured.filter(([, configuredPrice]) => configuredPrice === priceId);
+  if (matching.length !== 1) return null;
+  return matching[0][0];
 }

@@ -155,7 +155,7 @@ function Landing() {
               "Cronologia e gráficos avançados",
             ]}
             actionLabel="Assinar Pro"
-            onAction={() => handlePlan("subscription")}
+            onAction={() => handlePlan("subscription_monthly")}
             featured
           />
           <PlanCard
@@ -165,7 +165,7 @@ function Landing() {
             description="A experiência completa do Pro com o melhor custo-benefício para acompanhar o ano todo."
             features={["Tudo do Pro mensal", "Comparação antes/depois", "Relatórios de evolução"]}
             actionLabel="Escolher anual"
-            onAction={() => handlePlan("subscription")}
+            onAction={() => handlePlan("subscription_annual")}
           />
         </div>
       </section>
@@ -190,12 +190,14 @@ function Landing() {
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           <ProfessionalPlanCard
+            onAction={() => handlePlan("professional_personal")}
             name="Fita Personal"
             price="R$ 39,90"
             limit="Até 10 alunos"
             features={["Cadastro de alunos", "Medidas e histórico", "Gráficos individuais"]}
           />
           <ProfessionalPlanCard
+            onAction={() => handlePlan("professional_personal_pro")}
             name="Fita Personal Pro"
             price="R$ 69,90"
             limit="Até 30 alunos"
@@ -203,6 +205,7 @@ function Landing() {
             featured
           />
           <ProfessionalPlanCard
+            onAction={() => handlePlan("professional_studio")}
             name="Fita Studio"
             price="R$ 149"
             limit="Até 100 alunos"
@@ -215,12 +218,14 @@ function Landing() {
 }
 
 function ProfessionalPlanCard({
+  onAction,
   name,
   price,
   limit,
   features,
   featured = false,
 }: {
+  onAction: () => void;
   name: string;
   price: string;
   limit: string;
@@ -228,8 +233,7 @@ function ProfessionalPlanCard({
   featured?: boolean;
 }) {
   return (
-    <Link
-      to="/profissional"
+    <article
       className={`flex h-full flex-col rounded-sm p-6 ring-1 transition-transform hover:-translate-y-0.5 ${featured ? "bg-ink text-paper ring-ink" : "bg-vellum/50 text-ink ring-ink/10"}`}
     >
       <div className={`label-caps ${featured ? "text-paper/60" : "text-clay"}`}>{name}</div>
@@ -245,11 +249,13 @@ function ProfessionalPlanCard({
           <li key={feature}>• {feature}</li>
         ))}
       </ul>
-      <span
+      <button
+        type="button"
+        onClick={onAction}
         className={`mt-8 text-xs font-medium uppercase tracking-widest ${featured ? "text-paper" : "text-clay"}`}
       >
-        Conhecer a área →
-      </span>
-    </Link>
+        Assinar agora
+      </button>
+    </article>
   );
 }
