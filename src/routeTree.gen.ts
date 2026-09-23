@@ -17,6 +17,7 @@ import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as CronologiaRouteImport } from './routes/cronologia'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as NovaRouteImport } from './routes/nova'
+import { Route as ProfissionalRouteImport } from './routes/profissional'
 import { Route as MedidaIdRouteImport } from './routes/medida.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const NovaRoute = NovaRouteImport.update({
   path: '/nova',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfissionalRoute = ProfissionalRouteImport.update({
+  id: '/profissional',
+  path: '/profissional',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MedidaIdRoute = MedidaIdRouteImport.update({
   id: '/medida/$id',
   path: '/medida/$id',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/cronologia': typeof CronologiaRoute
   '/entrar': typeof EntrarRoute
   '/nova': typeof NovaRoute
+  '/profissional': typeof ProfissionalRoute
   '/medida/$id': typeof MedidaIdRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/cronologia': typeof CronologiaRoute
   '/entrar': typeof EntrarRoute
   '/nova': typeof NovaRoute
+  '/profissional': typeof ProfissionalRoute
   '/medida/$id': typeof MedidaIdRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/cronologia': typeof CronologiaRoute
   '/entrar': typeof EntrarRoute
   '/nova': typeof NovaRoute
+  '/profissional': typeof ProfissionalRoute
   '/medida/$id': typeof MedidaIdRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/cronologia'
     | '/entrar'
     | '/nova'
+    | '/profissional'
     | '/medida/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/cronologia'
     | '/entrar'
     | '/nova'
+    | '/profissional'
     | '/medida/$id'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/cronologia'
     | '/entrar'
     | '/nova'
+    | '/profissional'
     | '/medida/$id'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   CronologiaRoute: typeof CronologiaRoute
   EntrarRoute: typeof EntrarRoute
   NovaRoute: typeof NovaRoute
+  ProfissionalRoute: typeof ProfissionalRoute
   MedidaIdRoute: typeof MedidaIdRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NovaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profissional': {
+      id: '/profissional'
+      path: '/profissional'
+      fullPath: '/profissional'
+      preLoaderRoute: typeof ProfissionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/medida/$id': {
       id: '/medida/$id'
       path: '/medida/$id'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   CronologiaRoute: CronologiaRoute,
   EntrarRoute: EntrarRoute,
   NovaRoute: NovaRoute,
+  ProfissionalRoute: ProfissionalRoute,
   MedidaIdRoute: MedidaIdRoute,
 }
 export const routeTree = rootRouteImport

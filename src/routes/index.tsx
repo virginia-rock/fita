@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Github } from "lucide-react";
 import { useState } from "react";
 import { AccountModal } from "@/components/AccountModal";
-import { GroupContactModal } from "@/components/GroupContactModal";
 import { LocalStorageNotice } from "@/components/LocalStorageNotice";
 import { PlanCard } from "@/components/PlanCard";
 import { hasDemoCloudAccess, loadDemoSession, type DemoPlan } from "@/lib/demo-account";
@@ -11,16 +10,8 @@ import { useSupabaseAuth } from "@/lib/supabase-auth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Fita. · Acompanhe sua evolução corporal" },
-      {
-        name: "description",
-        content: "Registre suas medidas corporais com clareza, privacidade e uma rotina simples.",
-      },
-      { property: "og:title", content: "Fita. · Acompanhe sua evolução corporal" },
-      {
-        property: "og:description",
-        content: "Um espaço simples para registrar suas medidas e acompanhar sua evolução.",
-      },
+      { title: "Fita. · Acompanhe sua transformação corporal" },
+      { name: "description", content: "Acompanhe sua transformação corporal além do peso." },
     ],
   }),
   component: Landing,
@@ -28,13 +19,11 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [accountModalPlan, setAccountModalPlan] = useState<DemoPlan | null>(null);
-  const [groupContactOpen, setGroupContactOpen] = useState(false);
   const { user, loading: authLoading } = useSupabaseAuth();
   const demoAccount = loadDemoSession();
   const hasProAccess = Boolean(
     user && demoAccount?.id === user.id && hasDemoCloudAccess(demoAccount),
   );
-
   const handleAppEntry = () => {
     if (!authLoading && user) {
       window.location.assign("/conta");
@@ -42,7 +31,6 @@ function Landing() {
     }
     setAccountModalPlan("local");
   };
-
   const handlePlan = (plan: Exclude<DemoPlan, "local">) => {
     if (!authLoading && user) {
       window.location.assign(hasProAccess ? "/conta" : `/checkout?plan=${plan}`);
@@ -55,11 +43,11 @@ function Landing() {
     <main className="min-h-screen pb-20 text-ink">
       <div className="paper-grain fixed inset-0 -z-10 opacity-20" />
       <header className="mx-auto flex max-w-[1200px] items-center justify-between px-6 py-8">
-        <Link to="/" className="flex items-center gap-3" aria-label="Fita. — página inicial">
+        <Link to="/" className="flex items-center gap-3" aria-label="Fita — página inicial">
           <div>
-            <div className="flex items-end text-2xl font-semibold leading-none tracking-normal">
+            <div className="flex items-end text-2xl font-semibold leading-none">
               <span>Fita</span>
-              <span className="ml-1 size-2 shrink-0 -translate-y-px bg-clay" aria-hidden="true" />
+              <span className="ml-1 size-2 shrink-0 -translate-y-px bg-clay" />
             </div>
             <div className="num mt-1 text-[10px] uppercase tracking-widest text-ink/50">
               Registro corporal
@@ -70,7 +58,7 @@ function Landing() {
           <button
             type="button"
             onClick={handleAppEntry}
-            className="rounded-sm px-3 py-2 text-xs font-medium text-ink/65 transition-colors hover:text-ink"
+            className="rounded-sm px-3 py-2 text-xs font-medium text-ink/65 hover:text-ink"
           >
             {user ? "Minha conta" : "Entrar no app"}
           </button>
@@ -79,14 +67,12 @@ function Landing() {
             target="_blank"
             rel="noreferrer"
             aria-label="Abrir o projeto Fita no GitHub"
-            title="Abrir no GitHub"
-            className="inline-flex size-9 items-center justify-center rounded-sm bg-vellum text-ink/70 ring-1 ring-ink/10 transition-colors hover:bg-white hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
+            className="inline-flex size-9 items-center justify-center rounded-sm bg-vellum text-ink/70 ring-1 ring-ink/10 hover:bg-white hover:text-ink"
           >
-            <Github className="size-4" aria-hidden="true" />
+            <Github className="size-4" />
           </a>
         </div>
       </header>
-
       {accountModalPlan && (
         <AccountModal
           open
@@ -96,86 +82,174 @@ function Landing() {
           }}
         />
       )}
-      <GroupContactModal open={groupContactOpen} onOpenChange={setGroupContactOpen} />
-
       <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-12 md:pb-28 md:pt-24">
         <div className="max-w-3xl">
           <div className="label-caps text-clay">Uma fita métrica, uma balança</div>
           <h1 className="mt-5 max-w-2xl text-5xl font-medium leading-[0.98] tracking-[-0.04em] md:text-7xl">
-            Acompanhe sua evolução corporal.
+            Acompanhe sua transformação além do peso.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/65">
-            Registre circunferências, peso e composição corporal. Veja o que mudou, crie uma rotina e
-            mantenha seus dados sob seu controle.
+            Registre medidas, peso, composição corporal e evolução visual em um só lugar. Veja como
+            seu corpo muda ao longo do tempo, mesmo quando a balança não conta toda a história.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={handleAppEntry}
-              className="rounded-sm bg-clay px-5 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2"
+              className="rounded-sm bg-clay px-5 py-3 text-xs font-medium uppercase tracking-widest text-paper"
             >
-              Criar conta grátis
+              Começar grátis
             </button>
             <a
               href="#planos"
-              className="rounded-sm px-5 py-3 text-xs font-medium uppercase tracking-widest text-ink/60 ring-1 ring-ink/10 transition-colors hover:bg-white hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
+              className="rounded-sm px-5 py-3 text-xs font-medium uppercase tracking-widest text-ink/60 ring-1 ring-ink/10 hover:bg-white hover:text-ink"
             >
-              Conhecer os planos
+              Ver planos
             </a>
           </div>
         </div>
-
         <div className="mt-16 max-w-2xl">
           <LocalStorageNotice>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <button type="button" onClick={handleAppEntry} className="font-medium text-clay underline-offset-4 hover:underline">
-                Criar conta grátis
+              <button
+                type="button"
+                onClick={handleAppEntry}
+                className="font-medium text-clay underline-offset-4 hover:underline"
+              >
+                Começar grátis
               </button>
               <span className="text-ink/45">Importe e exporte seus dados quando quiser.</span>
             </div>
           </LocalStorageNotice>
         </div>
       </section>
-
       <section id="planos" className="mx-auto max-w-[1200px] scroll-mt-8 px-6">
         <div className="mb-8 max-w-xl">
-          <div className="label-caps text-clay">Se quiser ir além</div>
-          <h2 className="mt-3 text-3xl font-medium tracking-tight">Escolha como apoiar o Fita.</h2>
+          <div className="label-caps text-clay">Planos individuais</div>
+          <h2 className="mt-3 text-3xl font-medium tracking-tight">
+            Escolha como acompanhar sua evolução.
+          </h2>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            Crie sua conta para começar no plano gratuito ou escolha uma opção Pro com armazenamento em nuvem.
+            O gratuito mantém o essencial no seu navegador. O Pro adiciona nuvem, backup e uma visão
+            mais completa da transformação.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           <PlanCard
-            name="Acesso mensal"
-            price="R$ 29,90"
-            cadence="pagamento único"
-            description="Um mês de armazenamento em nuvem para manter seus registros disponíveis além deste navegador."
-            features={["Um mês de acesso à nuvem", "Login e área da conta", "Cronologia"]}
-            actionLabel="Adquirir um mês"
-            onAction={() => handlePlan("cloud_month")}
+            name="Fita Free"
+            price="R$ 0"
+            cadence="para sempre"
+            description="Para registrar sua evolução com privacidade e manter os dados neste navegador."
+            features={["Medidas e peso", "Histórico básico", "Exportação dos dados"]}
+            actionLabel="Começar grátis"
+            onAction={handleAppEntry}
           />
           <PlanCard
-            name="Apoio recorrente"
-            price="R$ 19,90"
+            name="Fita Pro mensal"
+            price="R$ 14,90"
             cadence="por mês"
-            description="Apoie a continuidade do projeto e tenha seus dados acessíveis em qualquer lugar."
-            features={["Armazenamento em nuvem", "Login e área da conta", "Cronologia", "Cancele quando quiser"]}
-            actionLabel="Assinar"
+            description="Sincronize seus registros e acompanhe sua transformação em qualquer dispositivo."
+            features={[
+              "Sincronização na nuvem",
+              "Backup automático",
+              "Cronologia e gráficos avançados",
+            ]}
+            actionLabel="Assinar Pro"
+            onAction={() => handlePlan("subscription")}
             featured
+          />
+          <PlanCard
+            name="Fita Pro anual"
+            price="R$ 119,90"
+            cadence="por ano · R$ 9,99/mês"
+            description="A experiência completa do Pro com o melhor custo-benefício para acompanhar o ano todo."
+            features={["Tudo do Pro mensal", "Comparação antes/depois", "Relatórios de evolução"]}
+            actionLabel="Escolher anual"
             onAction={() => handlePlan("subscription")}
           />
-          <PlanCard
-            name="Plano para grupos"
-            price="Sob consulta"
-            cadence="condições exclusivas"
-            description="Quer contratar o Fita. para um grupo de pessoas? Entre em contato para condições exclusivas."
-            features={["Atendimento personalizado", "Condições para grupos", "Solução sob medida"]}
-            actionLabel="Entrar em contato"
-            onAction={() => setGroupContactOpen(true)}
+        </div>
+      </section>
+      <section id="profissionais" className="mx-auto mt-24 max-w-[1200px] scroll-mt-8 px-6">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-xl">
+            <div className="label-caps text-clay">Para profissionais</div>
+            <h2 className="mt-3 text-3xl font-medium tracking-tight">
+              Acompanhe a evolução dos seus alunos em um só lugar.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-ink/60">
+              Medidas, peso, composição corporal, fotos, histórico e relatórios organizados para
+              facilitar cada acompanhamento.
+            </p>
+          </div>
+          <Link
+            to="/profissional"
+            className="rounded-sm px-4 py-3 text-xs font-medium uppercase tracking-widest text-clay ring-1 ring-clay/30 hover:bg-clay/5"
+          >
+            Sou profissional
+          </Link>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          <ProfessionalPlanCard
+            name="Fita Personal"
+            price="R$ 39,90"
+            limit="Até 10 alunos"
+            features={["Cadastro de alunos", "Medidas e histórico", "Gráficos individuais"]}
+          />
+          <ProfessionalPlanCard
+            name="Fita Personal Pro"
+            price="R$ 69,90"
+            limit="Até 30 alunos"
+            features={["Tudo do Personal", "Dashboard consolidado", "Relatórios e filtros"]}
+            featured
+          />
+          <ProfessionalPlanCard
+            name="Fita Studio"
+            price="R$ 149"
+            limit="Até 100 alunos"
+            features={["Tudo do Personal Pro", "Operação para studios", "Base pronta para equipes"]}
           />
         </div>
       </section>
     </main>
+  );
+}
+
+function ProfessionalPlanCard({
+  name,
+  price,
+  limit,
+  features,
+  featured = false,
+}: {
+  name: string;
+  price: string;
+  limit: string;
+  features: string[];
+  featured?: boolean;
+}) {
+  return (
+    <Link
+      to="/profissional"
+      className={`flex h-full flex-col rounded-sm p-6 ring-1 transition-transform hover:-translate-y-0.5 ${featured ? "bg-ink text-paper ring-ink" : "bg-vellum/50 text-ink ring-ink/10"}`}
+    >
+      <div className={`label-caps ${featured ? "text-paper/60" : "text-clay"}`}>{name}</div>
+      <div className="num mt-4 text-3xl font-medium">
+        {price}
+        <span className={`ml-2 text-xs font-normal ${featured ? "text-paper/60" : "text-ink/50"}`}>
+          /mês
+        </span>
+      </div>
+      <div className={`mt-1 text-sm ${featured ? "text-paper/75" : "text-ink/60"}`}>{limit}</div>
+      <ul className={`mt-6 flex-1 space-y-2 text-sm ${featured ? "text-paper/80" : "text-ink/65"}`}>
+        {features.map((feature) => (
+          <li key={feature}>• {feature}</li>
+        ))}
+      </ul>
+      <span
+        className={`mt-8 text-xs font-medium uppercase tracking-widest ${featured ? "text-paper" : "text-clay"}`}
+      >
+        Conhecer a área →
+      </span>
+    </Link>
   );
 }
