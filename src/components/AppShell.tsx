@@ -8,6 +8,7 @@ import { loadDemoSession } from "@/lib/demo-account";
 import { isCloudEntitled } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
+import { useStudentProfessionalLink } from "@/lib/professional-link-api";
 
 const NAV = [
   { to: "/app", label: "Painel Geral" },
@@ -26,8 +27,11 @@ export function AppShell({
   const fileRef = useRef<HTMLInputElement>(null);
   const [hasDemoSession, setHasDemoSession] = useState(false);
   const { user: supabaseUser, loading: authLoading } = useSupabaseAuth();
+  const { link: professionalLink } = useStudentProfessionalLink();
   const cloudSyncEnabled = isCloudEntitled(entitlement);
-  const visibleNav = NAV;
+  const visibleNav = professionalLink
+    ? [...NAV, { to: "/meu-personal" as const, label: "Meu Personal" }]
+    : NAV;
 
   useEffect(() => {
     if (!authLoading) {
@@ -40,15 +44,23 @@ export function AppShell({
       <main className="min-h-screen px-6 py-12 text-ink">
         <div className="mx-auto max-w-md rounded-sm bg-vellum/40 p-6 ring-1 ring-ink/10 md:p-8">
           <div className="label-caps text-clay">Conta necessÃ¡ria</div>
-          <h1 className="mt-3 text-3xl font-medium tracking-tight">Crie uma conta para continuar.</h1>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight">
+            Crie uma conta para continuar.
+          </h1>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
             O Fita exige uma conta para acessar o painel e manter seu acesso identificado.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/criar-conta" className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
+            <Link
+              to="/criar-conta"
+              className="rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper"
+            >
               Criar conta
             </Link>
-            <Link to="/entrar" className="rounded-sm bg-vellum px-4 py-3 text-xs font-medium uppercase tracking-widest text-ink/70 ring-1 ring-ink/10">
+            <Link
+              to="/entrar"
+              className="rounded-sm bg-vellum px-4 py-3 text-xs font-medium uppercase tracking-widest text-ink/70 ring-1 ring-ink/10"
+            >
               Entrar
             </Link>
           </div>
@@ -141,7 +153,8 @@ export function AppShell({
       <div className="mx-auto mt-8 max-w-[1200px] space-y-6 px-6">
         {entitlementError ? (
           <div className="rounded-sm bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
-            Não foi possível verificar seu plano Pro. Seus dados não serão sincronizados até a conexão ser restabelecida.
+            Não foi possível verificar seu plano Pro. Seus dados não serão sincronizados até a
+            conexão ser restabelecida.
           </div>
         ) : (
           showLocalStorageNotice && !cloudSyncEnabled && <LocalStorageNotice />

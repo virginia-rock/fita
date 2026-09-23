@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Plus, Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import {
   canAddProfessionalStudent,
   loadProfessionalStudents,
@@ -8,6 +10,18 @@ import {
   saveProfessionalStudents,
   type ProfessionalStudent,
 } from "@/lib/professional";
+import {
+  addProfessionalEvaluation,
+  createProfessionalInvitation,
+  listProfessionalStudents,
+  professionalLinkErrorMessage,
+} from "@/lib/professional-link-api";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import {
+  buildStudentReport,
+  canGenerateProfessionalReport,
+  renderStudentReportHtml,
+} from "@/lib/professional-reports";
 
 export const Route = createFileRoute("/profissional")({
   head: () => ({
@@ -40,6 +54,7 @@ function ProfessionalArea() {
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [invitationToken, setInvitationToken] = useState("");
   const plan = professionalPlan("personal_pro");
   const activeStudents = students.filter((student) => student.status === "active");
   const visibleStudents = useMemo(
@@ -49,10 +64,48 @@ function ProfessionalArea() {
   );
   const selectedStudent = students.find((student) => student.id === selectedId) ?? null;
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    listProfessionalStudents()
+      .then((rows) => {
+        const remoteStudents = (Array.isArray(rows) ? rows : []).map((row) => {
+          const item = row as {
+            link_id: string;
+            student_user_id: string;
+            student_email: string;
+            status: "pending" | "active";
+          };
+          return {
+            id: item.student_user_id,
+            linkId: item.link_id,
+            name: item.student_email,
+            email: item.student_email,
+            status: item.status,
+            evaluations: [],
+          } satisfies ProfessionalStudent;
+        });
+        setStudents(remoteStudents);
+      })
+      .catch(() => toast.error("Não foi possível carregar os alunos vinculados."));
+  }, []);
+
   const addStudent = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = newName.trim();
-    if (!name || !canAddProfessionalStudent(plan.id, activeStudents.length)) return;
+    if (!canAddProfessionalStudent(plan.id, activeStudents.length)) return;
+    if (isSupabaseConfigured) {
+      if (!newEmail.trim()) return;
+      createProfessionalInvitation(newEmail)
+        .then(({ invitation_token: token }) => {
+          setInvitationToken(token);
+          setNewName("");
+          setNewEmail("");
+          toast.success("Convite criado. Envie o token ao aluno.");
+        })
+        .catch((error) => toast.error(professionalLinkErrorMessage(error)));
+      return;
+    }
+    if (!name) return;
     const next: ProfessionalStudent[] = [
       ...students,
       {
@@ -117,7 +170,20 @@ function ProfessionalArea() {
         </section>
 
         {selectedStudent ? (
-          <StudentDetail student={selectedStudent} onBack={() => setSelectedId(null)} />
+          <StudentDetail
+            student={selectedStudent}
+            plan={plan.id}
+            onBack={() => setSelectedId(null)}
+            onEvaluationSaved={(evaluation) =>
+              setStudents((current) =>
+                current.map((item) =>
+                  item.id === selectedStudent.id
+                    ? { ...item, evaluations: [...item.evaluations, evaluation] }
+                    : item,
+                ),
+              )
+            }
+          />
         ) : (
           <section className="rounded-sm bg-vellum/35 p-5 ring-1 ring-ink/10 md:p-7">
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -140,7 +206,7 @@ function ProfessionalArea() {
                 className="mt-6 grid gap-3 rounded-sm bg-paper p-4 ring-1 ring-ink/10 md:grid-cols-[1fr_1fr_auto]"
               >
                 <input
-                  required
+                  required={!isSupabaseConfigured}
                   value={newName}
                   onChange={(event) => setNewName(event.target.value)}
                   placeholder="Nome do aluno"
@@ -150,7 +216,8 @@ function ProfessionalArea() {
                   type="email"
                   value={newEmail}
                   onChange={(event) => setNewEmail(event.target.value)}
-                  placeholder="E-mail (opcional)"
+                  required={isSupabaseConfigured}
+                  placeholder={isSupabaseConfigured ? "E-mail do aluno" : "E-mail (opcional)"}
                   className="rounded-sm bg-white px-3 py-2 text-sm ring-1 ring-ink/10 outline-none focus:ring-clay"
                 />
                 <button
@@ -160,6 +227,16 @@ function ProfessionalArea() {
                   Salvar
                 </button>
               </form>
+            )}
+
+            {invitationToken && (
+              <div className="mt-4 rounded-sm bg-sage/10 p-4 text-sm text-ink/70" role="status">
+                <div className="label-caps text-up">Token do convite</div>
+                <code className="mt-2 block break-all font-mono text-xs">{invitationToken}</code>
+                <p className="mt-2 text-xs text-ink/55">
+                  O aluno deve aceitar este convite logado com o mesmo e-mail informado.
+                </p>
+              </div>
             )}
 
             <div className="relative mt-6">
@@ -223,8 +300,79 @@ function SummaryCard({ label, value, detail }: { label: string; value: string; d
   );
 }
 
-function StudentDetail({ student, onBack }: { student: ProfessionalStudent; onBack: () => void }) {
+function StudentDetail({
+  student,
+  plan,
+  onBack,
+  onEvaluationSaved,
+}: {
+  student: ProfessionalStudent;
+  plan: string;
+  onBack: () => void;
+  onEvaluationSaved: (evaluation: NonNullable<ProfessionalStudent["evaluations"]>[number]) => void;
+}) {
+  const [weight, setWeight] = useState("");
+  const [waist, setWaist] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
   const evaluation = latestEvaluation(student);
+  const reportAvailable = canGenerateProfessionalReport(plan);
+  const saveEvaluation = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    const next = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString().slice(0, 10),
+      ...(weight ? { weight: Number(weight) } : {}),
+      ...(waist ? { waist: Number(waist) } : {}),
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
+    };
+    try {
+      if (student.linkId) {
+        await addProfessionalEvaluation(student.linkId, {
+          id: next.id,
+          date: next.date,
+          values: {
+            ...(next.weight !== undefined ? { peso: next.weight } : {}),
+            ...(next.waist !== undefined ? { cintura: next.waist } : {}),
+          },
+          ...(next.notes ? { note: next.notes } : {}),
+        });
+      }
+      onEvaluationSaved(next);
+      setWeight("");
+      setWaist("");
+      setNotes("");
+      toast.success("Avaliação registrada.");
+    } catch (error) {
+      toast.error(professionalLinkErrorMessage(error));
+    } finally {
+      setSaving(false);
+    }
+  };
+  const downloadReport = () => {
+    const report = buildStudentReport({
+      entries: student.evaluations.map((item) => ({
+        id: item.id,
+        date: item.date,
+        values: {
+          ...(item.weight !== undefined ? { peso: item.weight } : {}),
+          ...(item.waist !== undefined ? { cintura: item.waist } : {}),
+          ...(item.bodyFat !== undefined ? { gordura_pct: item.bodyFat } : {}),
+        },
+        ...(item.notes ? { note: item.notes } : {}),
+      })),
+    });
+    const blob = new Blob([renderStudentReportHtml(report, student.name)], {
+      type: "text/html",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `fita-relatorio-${student.name.toLowerCase().replaceAll(" ", "-")}.html`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <section className="rounded-sm bg-vellum/35 p-5 ring-1 ring-ink/10 md:p-7">
       <button
@@ -243,11 +391,54 @@ function StudentDetail({ student, onBack }: { student: ProfessionalStudent; onBa
           Ativo
         </span>
       </div>
+      {reportAvailable && (
+        <button
+          type="button"
+          onClick={downloadReport}
+          className="mt-5 rounded-sm bg-clay px-4 py-2 text-xs font-medium uppercase tracking-widest text-paper"
+        >
+          Gerar relatório
+        </button>
+      )}
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         <Metric label="Peso" value={evaluation?.weight ? `${evaluation.weight} kg` : "—"} />
         <Metric label="Cintura" value={evaluation?.waist ? `${evaluation.waist} cm` : "—"} />
         <Metric label="Gordura" value={evaluation?.bodyFat ? `${evaluation.bodyFat}%` : "—"} />
       </div>
+      <form
+        onSubmit={saveEvaluation}
+        className="mt-8 grid gap-3 border-t border-ink/10 pt-5 md:grid-cols-4"
+      >
+        <input
+          type="number"
+          step="0.1"
+          value={weight}
+          onChange={(event) => setWeight(event.target.value)}
+          placeholder="Peso (kg)"
+          className="rounded-sm bg-paper px-3 py-2 text-sm ring-1 ring-ink/10 outline-none focus:ring-clay"
+        />
+        <input
+          type="number"
+          step="0.1"
+          value={waist}
+          onChange={(event) => setWaist(event.target.value)}
+          placeholder="Cintura (cm)"
+          className="rounded-sm bg-paper px-3 py-2 text-sm ring-1 ring-ink/10 outline-none focus:ring-clay"
+        />
+        <input
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          placeholder="Observação"
+          className="rounded-sm bg-paper px-3 py-2 text-sm ring-1 ring-ink/10 outline-none focus:ring-clay"
+        />
+        <button
+          type="submit"
+          disabled={saving || (!weight && !waist && !notes.trim())}
+          className="rounded-sm bg-sage px-4 py-2 text-xs font-medium uppercase tracking-widest text-paper disabled:opacity-50"
+        >
+          {saving ? "Salvando…" : "Registrar avaliação"}
+        </button>
+      </form>
       <div className="mt-8 border-t border-ink/10 pt-5">
         <div className="label-caps text-ink/45">Histórico</div>
         <p className="mt-3 text-sm text-ink/60">

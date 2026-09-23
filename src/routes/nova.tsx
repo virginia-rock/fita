@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MEASURING_RULES, METRICS, METRIC_GROUPS } from "@/lib/measurements";
 import { toISO, useAppData } from "@/lib/storage";
+import { useStudentProfessionalLink } from "@/lib/professional-link-api";
 
 export const Route = createFileRoute("/nova")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/nova")({
       { property: "og:title", content: "Nova entrada · Fita." },
       {
         property: "og:description",
-        content: "Formulário completo de medidas corporais com as regras de ouro para medir sozinho.",
+        content:
+          "Formulário completo de medidas corporais com as regras de ouro para medir sozinho.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -30,6 +32,7 @@ export const Route = createFileRoute("/nova")({
 
 function NovaEntrada() {
   const { data, saveEntry } = useAppData();
+  const { link: professionalLink, loading: professionalLinkLoading } = useStudentProfessionalLink();
   const navigate = useNavigate();
   const { edit } = Route.useSearch();
   const editInitialized = useRef<string | null>(null);
@@ -53,6 +56,10 @@ function NovaEntrada() {
   }, [edit, editingEntry]);
 
   function submit() {
+    if (professionalLink && !professionalLink.can_student_edit) {
+      toast.error("Seu personal gerencia as avaliações enquanto o vínculo estiver ativo.");
+      return;
+    }
     const parsed: Record<string, number> = {};
     for (const metric of METRICS) {
       const raw = values[metric.id]?.replace(",", ".").trim();
@@ -75,12 +82,39 @@ function NovaEntrada() {
     navigate({ to: "/" });
   }
 
+  if (professionalLinkLoading) {
+    return (
+      <AppShell>
+        <div className="rounded-sm bg-vellum/40 p-8 text-sm text-ink/55">
+          Verificando permissões…
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (professionalLink && !professionalLink.can_student_edit) {
+    return (
+      <AppShell>
+        <div className="rounded-sm bg-clay/5 p-8 text-center ring-1 ring-clay/15">
+          <div className="label-caps text-clay">Edição temporariamente bloqueada</div>
+          <h1 className="mt-3 text-2xl font-medium">Seu personal registra suas avaliações.</h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink/60">
+            Você pode acompanhar os dados na aba Meu Personal. Quando o vínculo terminar, seus
+            registros continuarão na sua conta e a edição será liberada novamente.
+          </p>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <div className="rounded-sm bg-vellum/50 p-6 ring-1 ring-ink/5">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-ink/10 pb-4">
           <div>
-            <div className="label-caps text-ink/50">{editingEntry ? "Editar entrada" : "Nova entrada"}</div>
+            <div className="label-caps text-ink/50">
+              {editingEntry ? "Editar entrada" : "Nova entrada"}
+            </div>
             <h1 className="mt-2 text-xl font-medium tracking-tight">
               {editingEntry ? "Editar medição" : "Registrar medição"}
             </h1>
@@ -101,7 +135,10 @@ function NovaEntrada() {
             <div className="label-caps mb-3 text-clay">{group}</div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {METRICS.filter((m) => m.group === group).map((metric) => (
-                <label key={metric.id} className="flex flex-col gap-1 bg-paper p-3 ring-1 ring-ink/5">
+                <label
+                  key={metric.id}
+                  className="flex flex-col gap-1 bg-paper p-3 ring-1 ring-ink/5"
+                >
                   <span className="flex items-baseline justify-between">
                     <span className="text-[12px] font-semibold">{metric.label}</span>
                     <span className="num text-[10px] text-ink/40">
@@ -114,9 +151,7 @@ function NovaEntrada() {
                     inputMode="decimal"
                     placeholder="0,0"
                     value={values[metric.id] ?? ""}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, [metric.id]: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, [metric.id]: e.target.value }))}
                     className="num rounded-sm bg-vellum/60 px-3 py-2 text-base ring-1 ring-ink/10 focus:outline-none focus:ring-clay"
                   />
                   <span className="text-[10px] leading-snug text-ink/50">{metric.hint}</span>
@@ -146,7 +181,9 @@ function NovaEntrada() {
       </div>
 
       <div className="rounded-sm bg-clay/5 p-6 ring-1 ring-clay/10">
-        <div className="text-xs font-bold uppercase tracking-widest">Regras de ouro para medir sozinho</div>
+        <div className="text-xs font-bold uppercase tracking-widest">
+          Regras de ouro para medir sozinho
+        </div>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           {MEASURING_RULES.map((rule) => (
             <div key={rule.title} className="border-l border-clay/30 pl-3">

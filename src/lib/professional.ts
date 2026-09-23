@@ -51,9 +51,10 @@ export type ProfessionalEvaluation = {
 
 export type ProfessionalStudent = {
   id: string;
+  linkId?: string;
   name: string;
   email?: string;
-  status: "active" | "archived";
+  status: "active" | "archived" | "pending";
   evaluations: ProfessionalEvaluation[];
 };
 
