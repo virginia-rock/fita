@@ -7,6 +7,12 @@ export type PaidPlan =
   | "professional_personal_pro"
   | "professional_studio";
 
+export type InsiderOffer = "pro_monthly" | "personal";
+export type StripePriceConfig = {
+  plan: PaidPlan;
+  insiderOffer: InsiderOffer | null;
+};
+
 type StripeEnv = Record<string, string | undefined>;
 
 export function parsePaidPlan(value: unknown): PaidPlan | null {
@@ -33,6 +39,17 @@ const priceEnvByPlan: Record<PaidPlan, string> = {
   professional_studio: "FITA_STUDIO",
 };
 
+const insiderPriceConfigs: Array<{ envName: string; config: StripePriceConfig }> = [
+  {
+    envName: "FITA_PRO_MONTHLY_INSIDER",
+    config: { plan: "subscription_monthly", insiderOffer: "pro_monthly" },
+  },
+  {
+    envName: "FITA_PERSONAL_INSIDER",
+    config: { plan: "professional_personal", insiderOffer: "personal" },
+  },
+];
+
 export function isSubscriptionPlan(plan: PaidPlan) {
   return plan !== "cloud_month";
 }
@@ -48,10 +65,21 @@ export function priceIdForPlan(plan: PaidPlan, env: StripeEnv): string {
 }
 
 export function planForPriceId(priceId: string, env: StripeEnv): PaidPlan | null {
-  const configured = (Object.keys(priceEnvByPlan) as PaidPlan[])
-    .map((plan) => [plan, env[priceEnvByPlan[plan]]?.trim()] as const)
-    .filter((entry): entry is readonly [PaidPlan, string] => Boolean(entry[1]));
-  const matching = configured.filter(([, configuredPrice]) => configuredPrice === priceId);
+  return priceConfigForId(priceId, env)?.plan ?? null;
+}
+
+export function priceConfigForId(priceId: string, env: StripeEnv): StripePriceConfig | null {
+  const configured = [
+    ...(Object.keys(priceEnvByPlan) as PaidPlan[]).map((plan) => ({
+      priceId: env[priceEnvByPlan[plan]]?.trim(),
+      config: { plan, insiderOffer: null } satisfies StripePriceConfig,
+    })),
+    ...insiderPriceConfigs.map(({ envName, config }) => ({
+      priceId: env[envName]?.trim(),
+      config,
+    })),
+  ].filter((entry): entry is { priceId: string; config: StripePriceConfig } => Boolean(entry.priceId));
+  const matching = configured.filter((entry) => entry.priceId === priceId);
   if (matching.length !== 1) return null;
-  return matching[0][0];
+  return matching[0].config;
 }

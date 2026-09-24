@@ -1,4 +1,4 @@
-import { planForPriceId, parsePaidPlan, type PaidPlan } from "./stripe-config.ts";
+import { parsePaidPlan, priceConfigForId, type InsiderOffer, type PaidPlan } from "./stripe-config.ts";
 
 export type StripeEntitlementMutation = {
   eventId: string;
@@ -12,6 +12,8 @@ export type StripeEntitlementMutation = {
   stripeSubscriptionId: string | null;
   stripeCheckoutSessionId: string | null;
   stripePriceId: string;
+  insiderOffer: InsiderOffer | null;
+  trialEndsAt: string | null;
 };
 
 type StripeEventLike = {
@@ -35,6 +37,11 @@ function metadataOf(object: Record<string, unknown>) {
   return object.metadata && typeof object.metadata === "object"
     ? (object.metadata as Record<string, unknown>)
     : {};
+}
+
+function insiderOfferOf(metadata: Record<string, unknown>): InsiderOffer | null {
+  const offer = metadata.insider_offer;
+  return offer === "pro_monthly" || offer === "personal" ? offer : null;
 }
 
 function isoFromUnix(value: unknown) {
@@ -68,7 +75,17 @@ export function mapStripeEventToEntitlement(
   const userId = stringValue(metadata.supabase_user_id);
   const plan = parsePaidPlan(metadata.plan);
   const priceId = stringValue(object.price_id);
-  if (!userId || !plan || !priceId || planForPriceId(priceId, env) !== plan) return null;
+  const priceConfig = priceId ? priceConfigForId(priceId, env) : null;
+  const insiderOffer = insiderOfferOf(metadata);
+  if (
+    !userId ||
+    !plan ||
+    !priceId ||
+    !priceConfig ||
+    priceConfig.plan !== plan ||
+    priceConfig.insiderOffer !== insiderOffer
+  )
+    return null;
 
   const customer = stringValue(object.customer);
   const subscription =
@@ -78,9 +95,10 @@ export function mapStripeEventToEntitlement(
     object.id && eventType.startsWith("checkout.session.") ? object.id : null,
   );
   const currentPeriodEnd = isoFromUnix(object.current_period_end);
+  const trialEndsAt = isoFromUnix(object.trial_end);
 
   if (successfulCheckoutEvents.has(eventType)) {
-    if (object.payment_status !== "paid") return null;
+    if (object.payment_status !== "paid" && object.payment_status !== "no_payment_required") return null;
     return {
       eventId,
       eventType,
@@ -96,6 +114,8 @@ export function mapStripeEventToEntitlement(
       stripeSubscriptionId: subscription,
       stripeCheckoutSessionId: checkoutSession,
       stripePriceId: priceId,
+      insiderOffer,
+      trialEndsAt,
     };
   }
 
@@ -122,6 +142,8 @@ export function mapStripeEventToEntitlement(
       stripeSubscriptionId: subscription,
       stripeCheckoutSessionId: null,
       stripePriceId: priceId,
+      insiderOffer,
+      trialEndsAt,
     };
   }
 
@@ -138,6 +160,8 @@ export function mapStripeEventToEntitlement(
       stripeSubscriptionId: subscription,
       stripeCheckoutSessionId: null,
       stripePriceId: priceId,
+      insiderOffer,
+      trialEndsAt,
     };
   }
 

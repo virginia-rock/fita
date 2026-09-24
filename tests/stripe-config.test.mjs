@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   parsePaidPlan,
+  priceConfigForId,
   planForPriceId,
   priceIdForPlan,
 } from "../supabase/functions/_shared/stripe-config.ts";
@@ -14,6 +15,8 @@ const env = {
   FITA_PERSONAL: "price_personal_test",
   FITA_PERSONAL_PRO: "price_personal_pro_test",
   FITA_STUDIO: "price_studio_test",
+  FITA_PRO_MONTHLY_INSIDER: "price_pro_monthly_insider_test",
+  FITA_PERSONAL_INSIDER: "price_personal_insider_test",
 };
 
 test("accepts legacy and new paid plans", () => {
@@ -42,6 +45,14 @@ test("maps each paid plan to its configured Price ID", () => {
   assert.equal(planForPriceId("price_personal_test", env), "professional_personal");
   assert.equal(planForPriceId("price_personal_pro_test", env), "professional_personal_pro");
   assert.equal(planForPriceId("price_studio_test", env), "professional_studio");
+  assert.deepEqual(priceConfigForId("price_pro_monthly_insider_test", env), {
+    plan: "subscription_monthly",
+    insiderOffer: "pro_monthly",
+  });
+  assert.deepEqual(priceConfigForId("price_personal_insider_test", env), {
+    plan: "professional_personal",
+    insiderOffer: "personal",
+  });
   assert.equal(planForPriceId("price_unknown", env), null);
 });
 

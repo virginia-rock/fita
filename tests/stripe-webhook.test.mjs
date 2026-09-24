@@ -8,6 +8,8 @@ import {
 const env = {
   STRIPE_PRICE_CLOUD_MONTH: "price_cloud_month_test",
   STRIPE_PRICE_SUBSCRIPTION: "price_subscription_test",
+  FITA_PRO_MONTHLY_INSIDER: "price_pro_monthly_insider_test",
+  FITA_PERSONAL_INSIDER: "price_personal_insider_test",
 };
 
 const now = new Date("2026-09-22T12:00:00.000Z");
@@ -42,7 +44,35 @@ test("activates a one-time Checkout payment for 30 days", () => {
     stripeSubscriptionId: null,
     stripeCheckoutSessionId: "cs_123",
     stripePriceId: "price_cloud_month_test",
+    insiderOffer: null,
+    trialEndsAt: null,
   });
+});
+
+test("activates an Insider trial without immediate payment", () => {
+  const result = mapStripeEventToEntitlement(
+    event("checkout.session.completed", {
+      mode: "subscription",
+      payment_status: "no_payment_required",
+      metadata: {
+        supabase_user_id: "user-123",
+        plan: "subscription_monthly",
+        insider_offer: "pro_monthly",
+      },
+      price_id: "price_pro_monthly_insider_test",
+      customer: "cus_123",
+      subscription: "sub_123",
+      id: "cs_123",
+      trial_end: 1790078400,
+    }),
+    env,
+    now,
+  );
+
+  assert.equal(result?.status, "active");
+  assert.equal(result?.plan, "subscription_monthly");
+  assert.equal(result?.insiderOffer, "pro_monthly");
+  assert.equal(result?.trialEndsAt, "2026-09-22T12:00:00.000Z");
 });
 
 test("maps subscription lifecycle and invoice payment events", () => {
