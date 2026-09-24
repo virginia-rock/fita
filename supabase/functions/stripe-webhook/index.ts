@@ -103,6 +103,7 @@ Deno.serve(async (request) => {
       p_stripe_price_id: mutation.stripePriceId,
       p_insider_offer: mutation.insiderOffer,
       p_trial_ends_at: mutation.trialEndsAt,
+      p_subscribed_at: mutation.subscribedAt,
     });
     if (error) throw error;
 

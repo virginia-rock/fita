@@ -46,6 +46,7 @@ test("activates a one-time Checkout payment for 30 days", () => {
     stripePriceId: "price_cloud_month_test",
     insiderOffer: null,
     trialEndsAt: null,
+    subscribedAt: "2026-09-22T12:00:00.000Z",
   });
 });
 

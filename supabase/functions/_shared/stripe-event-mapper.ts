@@ -19,6 +19,7 @@ export type StripeEntitlementMutation = {
   stripePriceId: string;
   insiderOffer: InsiderOffer | null;
   trialEndsAt: string | null;
+  subscribedAt: string | null;
 };
 
 type StripeEventLike = {
@@ -122,6 +123,7 @@ export function mapStripeEventToEntitlement(
       stripePriceId: priceId,
       insiderOffer,
       trialEndsAt,
+      subscribedAt: now.toISOString(),
     };
   }
 
@@ -150,6 +152,7 @@ export function mapStripeEventToEntitlement(
       stripePriceId: priceId,
       insiderOffer,
       trialEndsAt,
+      subscribedAt: null,
     };
   }
 
@@ -168,6 +171,7 @@ export function mapStripeEventToEntitlement(
       stripePriceId: priceId,
       insiderOffer,
       trialEndsAt,
+      subscribedAt: null,
     };
   }
 
