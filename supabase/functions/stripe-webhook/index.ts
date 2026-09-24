@@ -24,15 +24,17 @@ async function enrichEvent(stripe: Stripe, event: Stripe.Event) {
     const sessionId = typeof object.id === "string" ? object.id : null;
     if (sessionId) {
       const session = await stripe.checkout.sessions.retrieve(sessionId, {
-        expand: ["line_items.data.price"],
+        expand: ["line_items.data.price", "subscription"],
       });
       const sessionRecord = session as unknown as Record<string, unknown>;
       const lineItems = sessionRecord.line_items as
         { data?: Array<Record<string, unknown>> } | undefined;
       const firstPrice = lineItems?.data?.[0]?.price as Record<string, unknown> | undefined;
+      const subscription = sessionRecord.subscription as Record<string, unknown> | undefined;
       enriched = {
         ...enriched,
         price_id: firstPrice?.id,
+        trial_end: subscription?.trial_end,
       };
     }
   }
@@ -99,6 +101,8 @@ Deno.serve(async (request) => {
       p_stripe_subscription_id: mutation.stripeSubscriptionId,
       p_stripe_checkout_session_id: mutation.stripeCheckoutSessionId,
       p_stripe_price_id: mutation.stripePriceId,
+      p_insider_offer: mutation.insiderOffer,
+      p_trial_ends_at: mutation.trialEndsAt,
     });
     if (error) throw error;
 

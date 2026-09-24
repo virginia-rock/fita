@@ -1,10 +1,6 @@
 import type { DemoPlan } from "./demo-account";
 import { parseInsiderAccess, type InsiderAccess } from "./insider";
-import {
-  isCloudEntitled,
-  parseEntitlement,
-  type Entitlement,
-} from "./entitlements";
+import { isCloudEntitled, parseEntitlement, type Entitlement } from "./entitlements";
 import { supabase } from "./supabase";
 
 const TABLE = "fita_entitlements";

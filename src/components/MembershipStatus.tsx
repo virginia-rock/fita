@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import type { DemoAccount } from "@/lib/demo-account";
+import type { InsiderOffer } from "@/lib/insider";
 import { getMembershipStatus } from "@/lib/membership-status";
+import { insiderOfferCopy, insiderTrialLabel } from "@/lib/insider-presentation";
 
 type MembershipStatusProps = {
   account: DemoAccount | null;
@@ -8,6 +10,9 @@ type MembershipStatusProps = {
   cloudSyncEnabled?: boolean;
   onCancelSubscription?: () => void | Promise<void>;
   entitlementSource?: "demo" | "stripe";
+  insiderOffer?: InsiderOffer | null;
+  trialEndsAt?: string | null;
+  onRequestCancelStripeSubscription?: () => void;
 };
 
 export function MembershipStatus({
@@ -16,6 +21,9 @@ export function MembershipStatus({
   cloudSyncEnabled = false,
   onCancelSubscription,
   entitlementSource = "demo",
+  insiderOffer = null,
+  trialEndsAt = null,
+  onRequestCancelStripeSubscription,
 }: MembershipStatusProps) {
   if (!account || account.plan === "local") {
     return (
@@ -65,6 +73,11 @@ export function MembershipStatus({
         <div className="label-caps text-ink/45">{canceledStatus.eyebrow}</div>
         <h2 className="mt-2 text-xl font-medium">{canceledStatus.title}</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink/60">{canceledStatus.description}</p>
+        {insiderOffer && (
+          <p className="mt-3 text-sm leading-relaxed text-ink/60">
+            Seu benefício {insiderOfferCopy(insiderOffer)} foi encerrado.
+          </p>
+        )}
         <Link
           to="/"
           hash="planos"
@@ -78,8 +91,15 @@ export function MembershipStatus({
 
   return (
     <div className="rounded-sm bg-clay/5 p-5 ring-1 ring-clay/20">
-      <div className="label-caps text-clay">Assinatura · Pro</div>
-      <h2 className="mt-2 text-xl font-medium">Plano recorrente</h2>
+      <div className="flex items-center gap-2">
+        <div className="label-caps text-clay">Assinatura · Pro</div>
+        {insiderOffer && (
+          <span className="label-caps rounded-sm bg-sage/15 px-2 py-1 text-sage">INSIDER</span>
+        )}
+      </div>
+      <h2 className="mt-2 text-xl font-medium">
+        {insiderOffer ? insiderOfferCopy(insiderOffer) : "Plano recorrente"}
+      </h2>
       <p className="mt-2 text-sm leading-relaxed text-ink/60">
         {account.status === "canceled"
           ? "Sua assinatura foi cancelada. Sua conta continua ativa e você pode usar o Fita normalmente, como no plano gratuito, sem sincronização com a nuvem."
@@ -91,6 +111,9 @@ export function MembershipStatus({
                 ? "Sua assinatura Stripe está em processamento. O acesso será atualizado conforme o status da cobrança."
                 : "Acesso simulado enquanto a assinatura estiver ativa. A cobrança real ainda não está conectada."}
       </p>
+      {insiderOffer && insiderTrialLabel(trialEndsAt) && (
+        <p className="mt-3 text-sm font-medium text-sage">{insiderTrialLabel(trialEndsAt)}</p>
+      )}
       {account.status === "active" && entitlementSource === "demo" && onCancelSubscription && (
         <button
           type="button"
@@ -100,6 +123,17 @@ export function MembershipStatus({
           Cancelar assinatura demo
         </button>
       )}
+      {account.status === "active" &&
+        entitlementSource === "stripe" &&
+        onRequestCancelStripeSubscription && (
+          <button
+            type="button"
+            onClick={onRequestCancelStripeSubscription}
+            className="mt-5 rounded-sm bg-vellum px-4 py-2 text-xs font-medium text-ink/75 ring-1 ring-ink/10 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
+          >
+            Cancelar assinatura
+          </button>
+        )}
     </div>
   );
 }

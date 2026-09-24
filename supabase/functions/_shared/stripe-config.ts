@@ -78,7 +78,9 @@ export function priceConfigForId(priceId: string, env: StripeEnv): StripePriceCo
       priceId: env[envName]?.trim(),
       config,
     })),
-  ].filter((entry): entry is { priceId: string; config: StripePriceConfig } => Boolean(entry.priceId));
+  ].filter((entry): entry is { priceId: string; config: StripePriceConfig } =>
+    Boolean(entry.priceId),
+  );
   const matching = configured.filter((entry) => entry.priceId === priceId);
   if (matching.length !== 1) return null;
   return matching[0].config;

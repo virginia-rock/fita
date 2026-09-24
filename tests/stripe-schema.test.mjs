@@ -58,3 +58,17 @@ test("allows new Pro and professional Stripe plan identifiers", async () => {
     assert.match(sql, new RegExp(plan));
   }
 });
+
+test("persists Insider entitlement and eligibility state in one Stripe transaction", async () => {
+  const sql = await readFile(
+    new URL(
+      "../supabase/migrations/20260924000001_apply_insider_stripe_events.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  assert.match(sql, /p_insider_offer text/i);
+  assert.match(sql, /p_trial_ends_at timestamptz/i);
+  assert.match(sql, /update public\.fita_insider_access/i);
+  assert.match(sql, /status = case when p_status = 'canceled' then 'canceled' else 'active' end/i);
+});

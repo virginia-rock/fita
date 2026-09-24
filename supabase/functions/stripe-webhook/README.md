@@ -10,6 +10,8 @@ Variáveis necessárias:
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_CLOUD_MONTH`
 - `STRIPE_PRICE_SUBSCRIPTION`
+- `FITA_PRO_MONTHLY_INSIDER`
+- `FITA_PERSONAL_INSIDER`
 
 O endpoint precisa receber o corpo bruto da requisição para validar
 `Stripe-Signature`. O RPC `apply_stripe_entitlement_event` combina a gravação

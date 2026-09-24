@@ -2,6 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { MembershipStatus } from "@/components/MembershipStatus";
+import { InsiderOfferCard } from "@/components/InsiderOfferCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAppData } from "@/lib/storage";
 import { isCloudEntitled } from "@/lib/entitlements";
 import {
@@ -11,7 +22,12 @@ import {
   saveDemoAccount,
   type DemoAccount,
 } from "@/lib/demo-account";
-import { cancelDemoEntitlement } from "@/lib/supabase-entitlements";
+import {
+  cancelDemoEntitlement,
+  loadInsiderAccess,
+  type InsiderAccess,
+} from "@/lib/supabase-entitlements";
+import { cancelStripeSubscription, createInsiderCheckoutSession } from "@/lib/stripe-checkout";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth, signOutFromSupabase } from "@/lib/supabase-auth";
 
@@ -23,10 +39,22 @@ export const Route = createFileRoute("/conta")({
 function Conta() {
   const [demoAccount, setDemoAccount] = useState<DemoAccount | null>(null);
   const [subscriptionError, setSubscriptionError] = useState("");
+  const [insiderAccess, setInsiderAccess] = useState<InsiderAccess | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelingStripeSubscription, setCancelingStripeSubscription] = useState(false);
   const { user, loading: authLoading } = useSupabaseAuth();
   const { entitlement, entitlementLoading, entitlementError } = useAppData();
 
   useEffect(() => setDemoAccount(loadDemoSession()), []);
+  useEffect(() => {
+    if (!user) {
+      setInsiderAccess(null);
+      return;
+    }
+    void loadInsiderAccess()
+      .then(setInsiderAccess)
+      .catch(() => setInsiderAccess(null));
+  }, [user]);
 
   const localAccount =
     (!isSupabaseConfigured ? demoAccount : demoAccount?.id === user?.id ? demoAccount : null) ??
@@ -118,6 +146,9 @@ function Conta() {
               isSupabaseAccount={Boolean(user)}
               cloudSyncEnabled={cloudSyncEnabled}
               entitlementSource={entitlement?.source}
+              insiderOffer={entitlement?.insider_offer ?? null}
+              trialEndsAt={entitlement?.trial_ends_at ?? null}
+              onRequestCancelStripeSubscription={() => setCancelDialogOpen(true)}
               onCancelSubscription={async () => {
                 setSubscriptionError("");
                 try {
@@ -128,6 +159,15 @@ function Conta() {
                 } catch {
                   setSubscriptionError("Não foi possível cancelar o plano Pro no Supabase.");
                 }
+              }}
+            />
+          )}
+          {insiderAccess?.status === "eligible" && (
+            <InsiderOfferCard
+              access={insiderAccess}
+              onStart={async () => {
+                const { url } = await createInsiderCheckoutSession();
+                window.location.assign(url);
               }}
             />
           )}
@@ -149,6 +189,43 @@ function Conta() {
               Sair
             </button>
           </div>
+          <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+            <AlertDialogContent className="border-ink/10 bg-paper text-ink">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancelar assinatura?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Seu acesso à nuvem e o benefício Insider serão encerrados assim que o Stripe
+                  confirmar o cancelamento.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={cancelingStripeSubscription}>
+                  Manter assinatura
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={cancelingStripeSubscription}
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    setCancelingStripeSubscription(true);
+                    setSubscriptionError("");
+                    try {
+                      await cancelStripeSubscription();
+                      setCancelDialogOpen(false);
+                    } catch {
+                      setSubscriptionError(
+                        "Não foi possível solicitar o cancelamento da assinatura.",
+                      );
+                    } finally {
+                      setCancelingStripeSubscription(false);
+                    }
+                  }}
+                  className="bg-clay text-paper hover:bg-clay/90"
+                >
+                  {cancelingStripeSubscription ? "Cancelando…" : "Cancelar assinatura"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </AppShell>

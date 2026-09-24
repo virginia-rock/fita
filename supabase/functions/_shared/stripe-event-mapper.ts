@@ -1,4 +1,9 @@
-import { parsePaidPlan, priceConfigForId, type InsiderOffer, type PaidPlan } from "./stripe-config.ts";
+import {
+  parsePaidPlan,
+  priceConfigForId,
+  type InsiderOffer,
+  type PaidPlan,
+} from "./stripe-config.ts";
 
 export type StripeEntitlementMutation = {
   eventId: string;
@@ -98,7 +103,8 @@ export function mapStripeEventToEntitlement(
   const trialEndsAt = isoFromUnix(object.trial_end);
 
   if (successfulCheckoutEvents.has(eventType)) {
-    if (object.payment_status !== "paid" && object.payment_status !== "no_payment_required") return null;
+    if (object.payment_status !== "paid" && object.payment_status !== "no_payment_required")
+      return null;
     return {
       eventId,
       eventType,
