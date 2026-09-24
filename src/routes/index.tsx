@@ -252,7 +252,11 @@ function ProfessionalPlanCard({
       <button
         type="button"
         onClick={onAction}
-        className={`mt-8 text-xs font-medium uppercase tracking-widest ${featured ? "text-paper" : "text-clay"}`}
+        className={`mt-8 w-full rounded-sm px-4 py-3 text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+          featured
+            ? "bg-paper text-ink focus-visible:ring-paper focus-visible:ring-offset-ink"
+            : "bg-clay text-paper focus-visible:ring-clay focus-visible:ring-offset-vellum"
+        }`}
       >
         Assinar agora
       </button>
