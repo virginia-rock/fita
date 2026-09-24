@@ -16,6 +16,8 @@ export type Entitlement = {
   status: EntitlementStatus;
   expires_at: string | null;
   source: EntitlementSource;
+  insider_offer?: "pro_monthly" | "personal" | null;
+  trial_ends_at?: string | null;
 };
 
 const plans: EntitlementPlan[] = [
@@ -39,7 +41,14 @@ export function parseEntitlement(value: unknown): Entitlement | null {
     !plans.includes(row["plan"] as EntitlementPlan) ||
     !statuses.includes(row["status"] as EntitlementStatus) ||
     !sources.includes(row["source"] as EntitlementSource) ||
-    (row["expires_at"] !== null && typeof row["expires_at"] !== "string")
+    (row["expires_at"] !== null && typeof row["expires_at"] !== "string") ||
+    (row["insider_offer"] !== undefined &&
+      row["insider_offer"] !== null &&
+      row["insider_offer"] !== "pro_monthly" &&
+      row["insider_offer"] !== "personal") ||
+    (row["trial_ends_at"] !== undefined &&
+      row["trial_ends_at"] !== null &&
+      typeof row["trial_ends_at"] !== "string")
   ) {
     return null;
   }
