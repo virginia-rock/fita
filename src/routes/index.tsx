@@ -234,7 +234,7 @@ function ProfessionalPlanCard({
 }) {
   return (
     <article
-      className={`flex h-full flex-col rounded-sm p-6 ring-1 transition-transform hover:-translate-y-0.5 ${featured ? "bg-ink text-paper ring-ink" : "bg-vellum/50 text-ink ring-ink/10"}`}
+      className={`flex h-full flex-col rounded-sm p-6 ring-1 transition-transform hover:-translate-y-0.5 ${featured ? "bg-[#372e28] text-paper ring-[#372e28]" : "bg-vellum/50 text-ink ring-ink/10"}`}
     >
       <div className={`label-caps ${featured ? "text-paper/60" : "text-clay"}`}>{name}</div>
       <div className="num mt-4 text-3xl font-medium">
@@ -254,8 +254,8 @@ function ProfessionalPlanCard({
         onClick={onAction}
         className={`mt-8 w-full rounded-sm px-4 py-3 text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
           featured
-            ? "bg-paper text-ink focus-visible:ring-paper focus-visible:ring-offset-ink"
-            : "bg-clay text-paper focus-visible:ring-clay focus-visible:ring-offset-vellum"
+            ? "bg-paper text-[#372e28] focus-visible:ring-paper focus-visible:ring-offset-[#372e28]"
+            : "bg-[#372e28] text-paper focus-visible:ring-[#372e28] focus-visible:ring-offset-vellum"
         }`}
       >
         Assinar agora
