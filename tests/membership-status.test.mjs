@@ -15,3 +15,10 @@ test("canceled subscription is presented as the current free plan with an upgrad
     actionHref: "/#planos",
   });
 });
+
+test("canceled Personal Insider is also presented as the free plan", () => {
+  const status = getMembershipStatus({ plan: "professional_personal", status: "canceled" });
+
+  assert.equal(status?.title, "Plano gratuito");
+  assert.equal(status?.actionHref, "/#planos");
+});

@@ -11,7 +11,7 @@ export type CanceledMembershipStatus = {
 export function getMembershipStatus(
   account: Pick<DemoAccount, "plan" | "status">,
 ): CanceledMembershipStatus | null {
-  if (!account.plan.startsWith("subscription") || account.status !== "canceled") {
+  if (account.plan === "local" || account.status !== "canceled") {
     return null;
   }
 
