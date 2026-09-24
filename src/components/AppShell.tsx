@@ -91,7 +91,7 @@ export function AppShell({
               />
             </div>
             <div className="num text-[11px] uppercase tracking-wider text-ink/60">
-              Registro corporal Â· {hoje}
+              Registro corporal· {hoje}
             </div>
           </div>
         </Link>

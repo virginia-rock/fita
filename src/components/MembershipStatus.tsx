@@ -1,4 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import type { DemoAccount } from "@/lib/demo-account";
+import { getMembershipStatus } from "@/lib/membership-status";
 
 type MembershipStatusProps = {
   account: DemoAccount | null;
@@ -52,6 +54,24 @@ export function MembershipStatus({
             </>
           )}
         </p>
+      </div>
+    );
+  }
+
+  const canceledStatus = getMembershipStatus(account);
+  if (canceledStatus) {
+    return (
+      <div className="rounded-sm bg-vellum/50 p-5 ring-1 ring-ink/10">
+        <div className="label-caps text-ink/45">{canceledStatus.eyebrow}</div>
+        <h2 className="mt-2 text-xl font-medium">{canceledStatus.title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink/60">{canceledStatus.description}</p>
+        <Link
+          to="/"
+          hash="planos"
+          className="mt-5 inline-flex rounded-sm bg-clay px-4 py-2 text-xs font-medium uppercase tracking-widest text-paper transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2"
+        >
+          {canceledStatus.actionLabel}
+        </Link>
       </div>
     );
   }
