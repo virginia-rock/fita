@@ -5,6 +5,7 @@ import {
   adminPlanFilters,
   loadAdminDashboard,
   loadAdminUsers,
+  type AdminDashboard,
   type AdminPlanFilter,
   type AdminUsersPage,
 } from "@/lib/admin-dashboard";
@@ -27,7 +28,7 @@ const date = (value: string | null) =>
 function Admin() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [selected, setSelected] = useState<AdminPlanFilter>("all");
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [page, setPage] = useState<AdminUsersPage | null>(null);
   const [number, setNumber] = useState(0);
   const [error, setError] = useState("");
@@ -95,11 +96,11 @@ function Admin() {
             <table role="table" className="w-full text-sm">
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Plano</th>
-                  <th>Status</th>
-                  <th>Assinou em</th>
-                  <th>Expira/renova em</th>
+                  <th className="text-left">Email</th>
+                  <th className="text-left">Plano</th>
+                  <th className="text-left">Status</th>
+                  <th className="text-left">Assinou em</th>
+                  <th className="text-left">Expira/renova em</th>
                 </tr>
               </thead>
               <tbody>
