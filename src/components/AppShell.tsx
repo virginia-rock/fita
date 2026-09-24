@@ -9,6 +9,7 @@ import { isCloudEntitled } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 import { useStudentProfessionalLink } from "@/lib/professional-link-api";
+import { loadAdminAccess } from "@/lib/supabase-entitlements";
 
 const NAV = [
   { to: "/app", label: "Painel Geral" },
@@ -26,6 +27,7 @@ export function AppShell({
   const { replaceAll, entitlement, entitlementError } = useAppData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [hasDemoSession, setHasDemoSession] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { user: supabaseUser, loading: authLoading } = useSupabaseAuth();
   const { link: professionalLink } = useStudentProfessionalLink();
   const cloudSyncEnabled = isCloudEntitled(entitlement);
@@ -38,6 +40,16 @@ export function AppShell({
       setHasDemoSession(Boolean(supabaseUser || (!isSupabaseConfigured && loadDemoSession())));
     }
   }, [authLoading, supabaseUser]);
+
+  useEffect(() => {
+    if (!supabaseUser) {
+      setIsAdmin(false);
+      return;
+    }
+    void loadAdminAccess()
+      .then(setIsAdmin)
+      .catch(() => setIsAdmin(false));
+  }, [supabaseUser]);
 
   if (!authLoading && !hasDemoSession) {
     return (
@@ -159,18 +171,29 @@ export function AppShell({
         ) : (
           showLocalStorageNotice && !cloudSyncEnabled && <LocalStorageNotice />
         )}
-        <nav className="flex gap-6 border-b border-ink/5 pb-2 text-[11px] font-semibold uppercase tracking-widest">
-          {visibleNav.map((item) => (
+        <nav className="flex items-end justify-between gap-6 border-b border-ink/5 pb-2 text-[11px] font-semibold uppercase tracking-widest">
+          <div className="flex gap-6">
+            {visibleNav.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                activeOptions={{ exact: item.to === "/app" }}
+                className="-mb-2 pb-2 text-ink/40 transition-colors hover:text-ink/70"
+                activeProps={{ className: "text-clay border-b border-clay" }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+          {isAdmin && (
             <Link
-              key={item.to}
-              to={item.to}
-              activeOptions={{ exact: item.to === "/app" }}
-              className="pb-2 -mb-2 text-ink/40 transition-colors hover:text-ink/70"
+              to="/admin"
+              className="-mb-2 pb-2 text-ink/40 transition-colors hover:text-ink/70"
               activeProps={{ className: "text-clay border-b border-clay" }}
             >
-              {item.label}
+              Admin
             </Link>
-          ))}
+          )}
         </nav>
 
         {children}

@@ -25,7 +25,6 @@ import {
 import {
   cancelDemoEntitlement,
   loadInsiderAccess,
-  loadAdminAccess,
   type InsiderAccess,
 } from "@/lib/supabase-entitlements";
 import { cancelStripeSubscription, createInsiderCheckoutSession } from "@/lib/stripe-checkout";
@@ -43,7 +42,6 @@ function Conta() {
   const [insiderAccess, setInsiderAccess] = useState<InsiderAccess | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelingStripeSubscription, setCancelingStripeSubscription] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const { user, loading: authLoading } = useSupabaseAuth();
   const { entitlement, entitlementLoading, entitlementError } = useAppData();
 
@@ -56,15 +54,6 @@ function Conta() {
     void loadInsiderAccess()
       .then(setInsiderAccess)
       .catch(() => setInsiderAccess(null));
-  }, [user]);
-  useEffect(() => {
-    if (!user) {
-      setIsAdmin(false);
-      return;
-    }
-    void loadAdminAccess()
-      .then(setIsAdmin)
-      .catch(() => setIsAdmin(false));
   }, [user]);
 
   const localAccount =
@@ -147,14 +136,6 @@ function Conta() {
         </div>
 
         <div className="mt-8 space-y-5">
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="inline-flex rounded-sm bg-vellum px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink ring-1 ring-ink/10"
-            >
-              Admin
-            </Link>
-          )}
           {entitlementError ? (
             <div className="rounded-sm bg-clay/10 p-5 text-sm text-clay" role="alert">
               Não foi possível verificar seu plano no Supabase. Tente novamente em instantes.
