@@ -22,7 +22,8 @@ export const Route = createFileRoute("/cronologia")({
       { title: "Cronologia · Fita." },
       {
         name: "description",
-        content: "Calendário das medições e configuração da recorrência: diária, semanal, quinzenal ou mensal.",
+        content:
+          "Calendário das medições e configuração da recorrência: diária, semanal, quinzenal ou mensal.",
       },
       { property: "og:title", content: "Cronologia · Fita." },
       {
@@ -44,7 +45,8 @@ const TIPOS: { id: Recurrence["type"]; label: string }[] = [
 ];
 
 function Cronologia() {
-  const { data, setRecurrence, removeEntry, entitlement, entitlementLoading, entitlementError } = useAppData();
+  const { data, setRecurrence, removeEntry, entitlement, entitlementLoading, entitlementError } =
+    useAppData();
   const { loading: authLoading } = useSupabaseAuth();
   const cloudSyncEnabled = isCloudEntitled(entitlement);
   const [ref, setRef] = useState(() => {
@@ -52,16 +54,33 @@ function Cronologia() {
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
 
-  if (!authLoading && !entitlementLoading && !entitlementError && !cloudSyncEnabled) {
+  if (authLoading || entitlementLoading) {
+    return (
+      <AppShell>
+        <div className="rounded-sm bg-vellum/40 p-8 text-sm text-ink/55">
+          Verificando permissões…
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!entitlementError && !cloudSyncEnabled) {
     return (
       <AppShell>
         <div className="mx-auto max-w-xl rounded-sm bg-vellum/50 p-8 ring-1 ring-ink/10">
           <div className="label-caps text-clay">Recurso Pro</div>
-          <h1 className="mt-3 text-3xl font-medium tracking-tight">A cronologia está disponível nos planos Pro.</h1>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight">
+            A cronologia está disponível nos planos Pro.
+          </h1>
           <p className="mt-3 text-sm leading-relaxed text-ink/60">
-            Faça um pagamento único ou assine para acessar a agenda de medições e sincronizar seu histórico na nuvem.
+            Faça um pagamento único ou assine para acessar a agenda de medições e sincronizar seu
+            histórico na nuvem.
           </p>
-          <Link to="/" hash="planos" className="mt-6 inline-block rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper">
+          <Link
+            to="/"
+            hash="planos"
+            className="mt-6 inline-block rounded-sm bg-clay px-4 py-3 text-xs font-medium uppercase tracking-widest text-paper"
+          >
             Conhecer os planos
           </Link>
         </div>
@@ -80,7 +99,8 @@ function Cronologia() {
 
   const cells: (Date | null)[] = [];
   for (let i = 0; i < first.getDay(); i++) cells.push(null);
-  for (let d = 1; d <= last.getDate(); d++) cells.push(new Date(ref.getFullYear(), ref.getMonth(), d));
+  for (let d = 1; d <= last.getDate(); d++)
+    cells.push(new Date(ref.getFullYear(), ref.getMonth(), d));
 
   const update = (patch: Partial<Recurrence>) => {
     setRecurrence({ ...r, ...patch });
@@ -257,7 +277,8 @@ function Cronologia() {
                 </Link>
                 <button
                   onClick={() => {
-                    if (!window.confirm("Excluir este registro? Essa ação não pode ser desfeita.")) return;
+                    if (!window.confirm("Excluir este registro? Essa ação não pode ser desfeita."))
+                      return;
                     removeEntry(e.id);
                     toast.success("Registro removido");
                   }}
