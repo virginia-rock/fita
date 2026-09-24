@@ -41,6 +41,20 @@ export async function loadInsiderAccess(): Promise<InsiderAccess | null> {
   return parseInsiderAccess(data);
 }
 
+export async function loadAdminAccess(): Promise<boolean> {
+  if (!supabase) return false;
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!userData.user) return false;
+  const { data, error } = await supabase
+    .from("fita_admin_access")
+    .select("role")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.role === "admin";
+}
+
 export async function activateDemoEntitlement(
   plan: Exclude<DemoPlan, "local">,
 ): Promise<Entitlement> {
