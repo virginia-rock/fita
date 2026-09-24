@@ -26,11 +26,11 @@ export function parsePaidPlan(value: unknown): PaidPlan | null {
 const priceEnvByPlan: Record<PaidPlan, string> = {
   cloud_month: "STRIPE_PRICE_CLOUD_MONTH",
   subscription: "STRIPE_PRICE_SUBSCRIPTION",
-  subscription_monthly: "STRIPE_PRICE_PRO_MONTHLY",
-  subscription_annual: "STRIPE_PRICE_PRO_ANNUAL",
-  professional_personal: "STRIPE_PRICE_PERSONAL",
-  professional_personal_pro: "STRIPE_PRICE_PERSONAL_PRO",
-  professional_studio: "STRIPE_PRICE_STUDIO",
+  subscription_monthly: "FITA_PRO_MONTHLY",
+  subscription_annual: "FITA_PRO_ANNUAL",
+  professional_personal: "FITA_PERSONAL",
+  professional_personal_pro: "FITA_PERSONAL_PRO",
+  professional_studio: "FITA_STUDIO",
 };
 
 export function isSubscriptionPlan(plan: PaidPlan) {

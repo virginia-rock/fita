@@ -9,11 +9,11 @@ import {
 const env = {
   STRIPE_PRICE_CLOUD_MONTH: "price_cloud_month_test",
   STRIPE_PRICE_SUBSCRIPTION: "price_subscription_test",
-  STRIPE_PRICE_PRO_MONTHLY: "price_pro_monthly_test",
-  STRIPE_PRICE_PRO_ANNUAL: "price_pro_annual_test",
-  STRIPE_PRICE_PERSONAL: "price_personal_test",
-  STRIPE_PRICE_PERSONAL_PRO: "price_personal_pro_test",
-  STRIPE_PRICE_STUDIO: "price_studio_test",
+  FITA_PRO_MONTHLY: "price_pro_monthly_test",
+  FITA_PRO_ANNUAL: "price_pro_annual_test",
+  FITA_PERSONAL: "price_personal_test",
+  FITA_PERSONAL_PRO: "price_personal_pro_test",
+  FITA_STUDIO: "price_studio_test",
 };
 
 test("accepts legacy and new paid plans", () => {
