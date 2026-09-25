@@ -17,6 +17,7 @@ dist-ssr
 *.local
 .lovable
 .superpowers/
+.worktrees/
 
 # Wrangler / Cloudflare
 .wrangler/
